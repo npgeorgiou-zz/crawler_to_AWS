@@ -20,7 +20,7 @@ public class DatabaseUtils {
 
     //construcor
     public DatabaseUtils() {
-        emf = Persistence.createEntityManagerFactory("JOBINDEX_FINAL_3PU");
+        emf = Persistence.createEntityManagerFactory("GlobejobCrawler_ToMySQLPU");
     }
 
     //methods
