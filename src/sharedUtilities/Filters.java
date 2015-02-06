@@ -33,7 +33,7 @@ public class Filters {
             + "Application Consultant, CX, Hadoop, Dynamics AX, iOS, REST, Android, iOS/Android, UI/UX, UI, UX, C#/.Net, C#, "
             + ".Net, JS, Javascript, Developer/Data specialist";
 
-    public static final String MED_SOC = "Pharmacology, Pharmacokineticist, Pharmacokinetics, Rheumatology, Infectious, hepatitis, "
+    public static final String MED_SOC = "Mikrobiolog, Pharmacology, Pharmacokineticist, Pharmacokinetics, Rheumatology, Infectious, hepatitis, "
             + "life science, Pharma, Clinical, medical, life science, Child, drug, oncology";
 
     public static final String BUSINESS = "Personal Assistant, Supply Planner, Demand Planner, Administrational Assistant, claims, compliance, "
@@ -49,10 +49,10 @@ public class Filters {
     public static final String RES_EDU = "PhD, lecturer, professor, Professorship, Post doc, Post docs, Postdoc, Postdocs, "
             + "postdoctoral, Research,Researcher ";
 
-    public static final String SERVICE = "Tour Leader, store keeping";
+    public static final String SERVICE = "Kitchen Manager, PIZZACHEF, Store manager, Tour Leader, store keeping, Truckdrivers";
 
     public static final String COMPANYNAMEDIRTS = " Danmark, Denmark, DK, (DK), Sweden, Sverige, Norway, Finland, (UK),"
-            + " (KU), (DTU), (SDU), (AAU), (RUC), (AU), (ITU), (MCI), A/..., AB, P/S, A/S, AS, LtD, ApS, a.m.b.a., amba,"
+            + " (KU), (DTU), (SDU), (AAU), (RUC), (AU), (ITU), (MCI), A/..., AB, P/S, A/S, a/S, AS, LtD, ApS, a.m.b.a., amba,"
             + " Forsikring, Nordics, Limited";
 
     public static final String COMPANYNAMESOLIDS_BIG = "University of Copenhagen, Københavns Universitet, "
@@ -62,7 +62,8 @@ public class Filters {
             + " Biogen Idec, Bae Systems";
 
     public static final String COMPANYNAMESOLIDS_SMALL = "Lundbeck, Grundfos, Danfoss, Cisco, ECCO, Dako, MAN, Codan, LEGO, "
-            + "Siemens, GN, Radiometer, e-conomic, Deloitte, Vestas, Mellanox, UNICEF, Cognizant";
+            + "Siemens, GN, Radiometer, e-conomic, Deloitte, Vestas, Mellanox, UNICEF, Cognizant, Accenture, Emerson, Nordea, "
+            + "Flsmidth, Velux, AVK";
 
     //jobs whose companies say jobindex, Mercuri Urval, and other jobsites, delete them. They are jobs probabely from
     //jobindex's robotjobs. We have them from elsewhere (check that before u make it!)

@@ -37,6 +37,10 @@ public class Filter {
         //remove weird gap char
         cn = cn.replaceAll("\\u0096", "")
                 .replaceAll("\\u00a0", "");
+        //.dk, .com
+        cn = cn.replaceAll("\\.dk", "");
+        cn = cn.replaceAll("\\.com", "");
+
         //remove dots
         cn = cn.replaceAll("\\.", "");
         cn = cn.replaceAll("\\.\\.\\.", "");
@@ -45,6 +49,9 @@ public class Filter {
         cn = cn.replaceAll("-koncernen", "");
         cn = cn.replaceAll("i Kobenhavn", "");
         cn = cn.replaceAll(" København", "");
+
+        //filter everything in parenthesis
+        cn = cn.replaceAll("\\([^\\(^\\)]*\\)", "");
 
         //remove everything that tends to come after some companies names e.g. MAN "DIESEL"
         String[] companyNameWords = cn.split(" ");
@@ -159,13 +166,22 @@ public class Filter {
     }
 
     private String replaceStrings(String cn) {
+        if (cn.contains("Maersk") || cn.equalsIgnoreCase("Mærsk")) {
+            cn = "Maersk";
+        }
+
         if (cn.equalsIgnoreCase("KK-ELECTRONIC")) {
             cn = "KK Wind Solutions";
         }
+
         if (cn.equalsIgnoreCase("DHI")) {
             cn = "DHI Group";
         }
-        if (cn.equalsIgnoreCase("OBJECT")) {
+        if (cn.equalsIgnoreCase("Alk-Abelló")) {
+            cn = "ALK";
+        }
+        if (cn.equalsIgnoreCase("OBJECT")
+                || cn.equalsIgnoreCase("Vero Moda")) {
             cn = "Bestseller";
         }
         if (cn.equalsIgnoreCase("HP")) {
@@ -181,8 +197,8 @@ public class Filter {
             cn = "European Spallation Source ESS";
         }
         if (cn.equalsIgnoreCase("BørneUngeKlinikken")
-                || cn.equalsIgnoreCase("Ortopædkirurgisk Afdeling")
-                || cn.equalsIgnoreCase("Direktionen (afdDI01)")) {
+                || cn.equalsIgnoreCase("Institut For Sygdomsforebyggelse")
+                || cn.equalsIgnoreCase("Ortopædkirurgisk Afdeling")) {
             cn = "Region Hovedstaden";
         }
 
@@ -221,6 +237,10 @@ public class Filter {
                 || cn.equalsIgnoreCase("Niels Bohr Institutet")
                 || cn.equalsIgnoreCase("SAXO-Instituttet")
                 || cn.equalsIgnoreCase("Det Sundhedsvidenskabelige Fakultet (SUND)")
+                || cn.equalsIgnoreCase("Institut For Folkesundhedsvidenskab")
+                || cn.equalsIgnoreCase("Institut For Intl Sundhed, Immunologi Og Mikrobio")
+                || cn.equalsIgnoreCase("Institut For Veterinær Sygdomsbiologi (sund)")
+                || cn.equalsIgnoreCase("Institut For Neurovidenskab Og Farmakologi")
                 || cn.equalsIgnoreCase("Biologisk Institut")) {
             cn = "University of Copenhagen";
         }
@@ -252,7 +272,6 @@ public class Filter {
     }
 
     public String homogeniseJobTitle(String jt) {
-        jt = jt.replaceAll("/", " ");
         //remove weird gap char
         jt = jt.replaceAll("\\u0096", "")
                 .replaceAll("\\u00a0", "");
@@ -330,7 +349,19 @@ public class Filter {
         if (url.contains("www.danskebank.com")) {
             url = url.replaceAll("&Dis=", "");
         }
+        //    https://jobsearch.maersk.com/vacancies/publication?pinst=005056A52F591EE4A59878C61A774DD1&CallBackUrl=http://www.maersk.com/system/sapcallbackurl&userid=
+        //    https://jobsearch.maersk.com/vacancies/publication?PINST=005056A52F591EE4A59878C61A774DD1&APPLY=X
+        if (url.contains("jobsearch.maersk.com")) {
+            try {
+                String divider = "pinst=";
+                url = url.split(divider)[0].concat(divider).concat(url.split(divider)[1].split("&")[0]);
+            } catch (Exception e) {
+                //aioob ex because of url that didnt have the right format. Try second format
+                String divider = "PINST=";
+                url = url.split(divider)[0].concat(divider).concat(url.split(divider)[1].split("&")[0]);
+            }
 
+        }
         return url;
     }
 
@@ -391,12 +422,12 @@ public class Filter {
                     changeJobField(JobBeingFiletered, jobCategory, JobCategories.INDUSTRY, "ADD");
                     fieldChanged = true;
                 }
-//                if (filterCategory(Filters.MED_SOC, jobTitle)) {//if title contains M&S words
-//                    System.out.println(jobCategory.toUpperCase() + " ++++ "
-//                            + JobCategories.MED_SOC + " # " + "\t" + jobTitle + "\r\n");
-//                    changeJobField(JobBeingFiletered, jobCategory, JobCategories.MARKETING, "ADD");
-//                    fieldChanged = true;
-//                }
+                if (filterCategory(Filters.MED_SOC, jobTitle)) {//if title contains M&S words
+                    System.out.println(jobCategory.toUpperCase() + " ++++ "
+                            + JobCategories.MED_SOC + " # " + "\t" + jobTitle + "\r\n");
+                    changeJobField(JobBeingFiletered, jobCategory, JobCategories.MARKETING, "ADD");
+                    fieldChanged = true;
+                }
                 if (filterCategory(Filters.BUSINESS, jobTitle)) {//if title contains business words
                     System.out.println(jobCategory.toUpperCase() + " ++++ "
                             + JobCategories.BUSINESS + " # " + "\t" + jobTitle + "\r\n");
@@ -529,7 +560,6 @@ public class Filter {
                     fieldChanged = true;
                 }
                 break;
-
             default:
                 if (filterCategory(Filters.RES_EDU, jobTitle)) {//if title contains researchAndEdu words
                     System.out.println(jobCategory.toUpperCase() + " ---> "

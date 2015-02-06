@@ -26,10 +26,6 @@ import dbUtils.DatabaseUtils;
 import crawlerUtils.LangDetect;
 import com.cybozu.labs.langdetect.LangDetectException;
 import model.Metrics;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
@@ -254,7 +250,7 @@ public class JobindexCrawler {
                             jobAnnouncer = filter.homogeniseCompanyName(jobAnnouncer);
                             jobURL = filter.homogeniseURL(jobURL);
                             ArrayList fields = new ArrayList();
-                            identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, city, foundAt, fields);
+                            identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobSmallText, 1, city, foundAt, fields);
                         } catch (MalformedURLException e) {
                             e.printStackTrace(System.out);
                         }
@@ -325,7 +321,7 @@ public class JobindexCrawler {
                                 jobTitle = filter.homogeniseJobTitle(jobTitle);
                                 jobAnnouncer = filter.homogeniseCompanyName(jobAnnouncer);
                                 jobURL = filter.homogeniseURL(jobURL);
-                                Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, city, foundAt, fields);
+                                Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobSmallText, 1, city, foundAt, fields);
 
                                 Field f = new Field(jobCategory);
                                 identifiedJob.addField(f);
@@ -334,7 +330,7 @@ public class JobindexCrawler {
 
                                 jobs.add(identifiedJob);
                                 jobsInEnglish++;
-
+//
 //                                //TEMPORARILY HERE: SAVE COMPANY AND LOGO
 //                                //********* take logo
 //                                Element img = paidJobDiv.select("img[src]").first();
@@ -380,7 +376,7 @@ public class JobindexCrawler {
 //                                }
 //
 //                                ////********* take logo end
-//                                Company c = new Company(jobAnnouncer, logoPath);
+                                Company c = new Company(jobAnnouncer);
 //                                dbUtils.addCompanyToDatabase(c);
                             }
                         } catch (IOException e) {
@@ -522,7 +518,7 @@ public class JobindexCrawler {
                             jobURL = filter.homogeniseURL(jobURL);
 
                             ArrayList fields = new ArrayList();
-                            identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, city, foundAt, fields);
+                            identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobText, 0, city, foundAt, fields);
                         } catch (MalformedURLException e) {
                             e.printStackTrace(System.out);
                             exceptions++;
@@ -595,7 +591,7 @@ public class JobindexCrawler {
                                 jobTitle = filter.homogeniseJobTitle(jobTitle);
                                 jobAnnouncer = filter.homogeniseCompanyName(jobAnnouncer);
                                 jobURL = filter.homogeniseURL(jobURL);
-                                Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate,  city, foundAt, fields);
+                                Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobText, 0, city, foundAt, fields);
 
                                 Field f = new Field(jobCategory);
                                 identifiedJob.addField(f);

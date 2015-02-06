@@ -247,7 +247,7 @@ public class JobbsafariCrawler {
                             jobAnnouncer = filter.homogeniseCompanyName(jobAnnouncer);
                             jobURL = filter.homogeniseURL(jobURL);
                             ArrayList fields = new ArrayList();
-                            identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, city, foundAt, fields);
+                            identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobSmallText, 1, city, foundAt, fields);
                         } catch (MalformedURLException e) {
                             e.printStackTrace(System.out);
                         }
@@ -318,7 +318,7 @@ public class JobbsafariCrawler {
                                 jobTitle = filter.homogeniseJobTitle(jobTitle);
                                 jobAnnouncer = filter.homogeniseCompanyName(jobAnnouncer);
                                 jobURL = filter.homogeniseURL(jobURL);
-                                Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, city, foundAt, fields);
+                                Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobSmallText, 1, city, foundAt, fields);
 
                                 Field f = new Field(jobCategory);
                                 identifiedJob.addField(f);
@@ -458,7 +458,7 @@ public class JobbsafariCrawler {
                             jobAnnouncer = filter.homogeniseCompanyName(jobAnnouncer);
                             jobURL = filter.homogeniseURL(jobURL);
                             ArrayList fields = new ArrayList();
-                            identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, city, foundAt, fields);
+                            identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobText, 0, city, foundAt, fields);
                         } catch (MalformedURLException e) {
                             e.printStackTrace(System.out);
                             exceptions++;
@@ -530,7 +530,7 @@ public class JobbsafariCrawler {
                                 jobTitle = filter.homogeniseJobTitle(jobTitle);
                                 jobAnnouncer = filter.homogeniseCompanyName(jobAnnouncer);
                                 jobURL = filter.homogeniseURL(jobURL);
-                                Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, city, foundAt, fields);
+                                Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobText, 0, city, foundAt, fields);
 
                                 Field f = new Field(jobCategory);
                                 identifiedJob.addField(f);
@@ -639,7 +639,7 @@ public class JobbsafariCrawler {
      */
     private Date convertSTRtoDATE(String mystr) {
         try {
-            Date date = new SimpleDateFormat("d MMMM yyyy", new Locale("da", "DK")).parse(mystr);
+            Date date = new SimpleDateFormat("d MMMM yyyy", new Locale("sv", "SE")).parse(mystr);
             return date;
         } catch (ParseException e) {
             exceptions++;

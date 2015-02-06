@@ -4,7 +4,6 @@ import model.Metrics;
 import crawlers.JobindexCrawler;
 import com.cybozu.labs.langdetect.LangDetectException;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import crawlerUtils.LangDetect;
 import java.util.ArrayList;
@@ -98,23 +97,7 @@ class JobindexController {
         } catch (IOException e1) {
             e1.printStackTrace(System.out);
         }
-        //scan ledelse ######################################################################
-        try {
-            String fields[] = {"freelancekonsulent", "itledelse", "institutions", "leder", "teknikledelse", "projektledelse", "salgschef", "topledelse", "oekonomichef"};
-            for (AdmDivision d : allAdmDivisions) {
-                for (String subd : d.subdivisions) {
-                    for (String field : fields) {
-                        String URL = "http://www.jobindex.dk/job/ledelse" + "/" + field + "/" + subd;
-                        JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.LEADERSHIP, "Jobindex", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
 
-                    }
-                }
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace(System.out);
-        }
         //scan handel ######################################################################
         try {
             String fields[] = {"bud", "boernepasning", "detailhandel", "ejendomsservice", "hotel", "rengoering", "service", "sikkerhed"};
@@ -242,6 +225,24 @@ class JobindexController {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/oevrige" + "/" + field + "/" + subd;
                         JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.STUDENT, "Jobindex", languageDetector);
+                        Metrics m = crawlerInstance.scan();
+                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+
+                    }
+                }
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+        }
+
+        //scan ledelse ######################################################################
+        try {
+            String fields[] = {"freelancekonsulent", "itledelse", "institutions", "leder", "teknikledelse", "projektledelse", "salgschef", "topledelse", "oekonomichef"};
+            for (AdmDivision d : allAdmDivisions) {
+                for (String subd : d.subdivisions) {
+                    for (String field : fields) {
+                        String URL = "http://www.jobindex.dk/job/ledelse" + "/" + field + "/" + subd;
+                        JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.LEADERSHIP, "Jobindex", languageDetector);
                         Metrics m = crawlerInstance.scan();
                         updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
 

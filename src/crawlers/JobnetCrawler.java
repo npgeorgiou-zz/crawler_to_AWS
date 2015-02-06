@@ -94,6 +94,7 @@ public class JobnetCrawler {
             Logger.getLogger(JobindexCrawler.class.getName()).log(Level.SEVERE, null, e);
         }
 
+        
         ArrayList<Job> jobs = new ArrayList<>();
         String reply = doc.text();
         jsonReply r = gson.fromJson(reply, jsonReply.class);
@@ -120,18 +121,21 @@ public class JobnetCrawler {
                                 } else {
                                     danish = true;
                                 }
-
+                                
                                 // check if ad required danish even if its written in English
                                 if (filter.checkIfRequiresDanish(jobText)) {
 //                                    System.out.println("Danish requirement:" + internalDocument.baseUri());
                                     danish = true;
                                 }
+                                
+                                System.out.println("¤¤¤¤¤¤ " + j.HiringOrgName);
                                 //dont take any vestas jobs. The url is jobnet url, and they format the title in a way
                                 //that doenst allow duplicate filtering. I get Vestas from the other sites anyways
                                 //get job title
-                                String jobTitle = j.Headline;
-                                if (jobTitle.toLowerCase().contains("vestas")) {
+                                String company = j.HiringOrgName;
+                                if (company.toLowerCase().contains("vestas")) {
                                     danish = true;
+                                    System.out.println("¤¤¤¤¤¤ FOUND");
                                 }
 
                                 if (danish == false) {
@@ -140,7 +144,8 @@ public class JobnetCrawler {
 //                                    System.out.println(" ");
 
                                     // get info that we need
-                                    //get company
+                                    //get title and company
+                                    String jobTitle = j.Headline;
                                     String jobAnnouncer = j.HiringOrgName;
                                     //get publication date
                                     String datePublished = j.PostingCreated;
@@ -167,7 +172,7 @@ public class JobnetCrawler {
                                     jobTitle = filter.homogeniseJobTitle(jobTitle);
                                     jobAnnouncer = filter.homogeniseCompanyName(jobAnnouncer);
                                     jobURL = filter.homogeniseURL(jobURL);
-                                    Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, area, foundAt, fields);
+                                    Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobText, 1, area, foundAt, fields);
 
                                     Field f = new Field(jobCategory);
                                     identifiedJob.addField(f);

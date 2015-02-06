@@ -25,14 +25,17 @@ public class Company implements Serializable {
     String companyName;
     
 //    @Column()
-//    String logoPath;
+    String logoPath;
     
     //constructors
+    public Company(String companyName, String logoPath) {
+        this.companyName = companyName;
+        this.logoPath = logoPath;
+    }
     public Company(String companyName) {
         this.companyName = companyName;
-//        this.logoPath = logoPath;
     }
-
+    
     public Company() {
 
     }

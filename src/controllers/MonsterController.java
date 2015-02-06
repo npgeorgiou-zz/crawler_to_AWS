@@ -68,22 +68,7 @@ class MonsterController {
         } catch (IOException e1) {
             e1.printStackTrace(System.out);
         }
-        //scan ledelse ######################################################################
-        try {
-            String fields[] = {"Projekt-programstyring", "Ledelse-Management"};
 
-            for (String field : fields) {
-                for (String area : areas) {
-                    String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawlerInstance = new MonsterCrawler(URL, area, JobCategories.LEADERSHIP, "Monster", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
-                }
-            }
-
-        } catch (IOException e1) {
-            e1.printStackTrace(System.out);
-        }
         //scan handel ######################################################################
         try {
             String fields[] = {"Kundesupport-kundepleje", "Bespisning-indkvartering"};
@@ -164,6 +149,23 @@ class MonsterController {
             e1.printStackTrace(System.out);
         }
 
+        //scan ledelse ######################################################################
+        try {
+            String fields[] = {"Projekt-programstyring", "Ledelse-Management"};
+
+            for (String field : fields) {
+                for (String area : areas) {
+                    String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
+                    MonsterCrawler crawlerInstance = new MonsterCrawler(URL, area, JobCategories.LEADERSHIP, "Monster", languageDetector);
+                    Metrics m = crawlerInstance.scan();
+                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                }
+            }
+
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+        }
+
 //        //scan social ######################################################################
 //        //#######nothing like this in this site
 //        try {
@@ -208,8 +210,6 @@ class MonsterController {
 //        } catch (IOException e1) {
 //            e1.printStackTrace(System.out);
 //        }
-       
-
         //metrics
         System.out.println("METRICS:");
         System.out.println("Jobs in site: " + "\t" + METRICS.getAllJobs());

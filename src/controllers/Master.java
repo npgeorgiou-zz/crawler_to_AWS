@@ -28,6 +28,8 @@ public class Master {
 
         dbUtils.flushDatabase();
 
+
+
         //Jobbank
         Metrics jbm = new JobbankController().start();
         updateMetrics(finalM, jbm.getAllJobs(), jbm.getJobsInEnglish(), jbm.getDuplicateJobs(), jbm.getExceptions());
@@ -47,6 +49,7 @@ public class Master {
         //Jobbsafari
         Metrics jsm = new JobbsafariController().start();
         updateMetrics(finalM, jsm.getAllJobs(), jsm.getJobsInEnglish(), jsm.getDuplicateJobs(), jsm.getExceptions());
+
         //sout and save results
         soutMetrics(jbm);
 //        dbUtils.addMetricToDatabase(jbm);

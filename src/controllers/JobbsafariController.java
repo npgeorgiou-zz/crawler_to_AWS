@@ -65,24 +65,10 @@ class JobbsafariController {
         } catch (IOException e1) {
             e1.printStackTrace(System.out);
         }
-        //scan ledelse ######################################################################
-        try {
-            String fields[] = {"itchefer", "ekonomichef", "teknikchefer", "freelancekonsult", "foretagsledning", "institution", "chef", "projektledning"};
 
-            for (String field : fields) {
-                for (String area : areas) {
-                    String URL = "http://www.jobbsafari.se/jobb/management" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.LEADERSHIP, "Jobbsafari", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
-                }
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace(System.out);
-        }
         //scan handel ######################################################################
         try {
-            String fields[] = {"barnpassning", "bud", "detaljhandel", "fastighetsservice", "frisor", "hotell", "rengoring", "service","sakerhet"};
+            String fields[] = {"barnpassning", "bud", "detaljhandel", "fastighetsservice", "frisor", "hotell", "rengoring", "service", "sakerhet"};
 
             for (String field : fields) {
                 for (String area : areas) {
@@ -187,6 +173,22 @@ class JobbsafariController {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/andra" + "/" + field + "/" + AC.get(area);
                     JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.STUDENT, "Jobbsafari", languageDetector);
+                    Metrics m = crawlerInstance.scan();
+                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                }
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+        }
+
+        //scan ledelse ######################################################################
+        try {
+            String fields[] = {"itchefer", "ekonomichef", "teknikchefer", "freelancekonsult", "foretagsledning", "institution", "chef", "projektledning"};
+
+            for (String field : fields) {
+                for (String area : areas) {
+                    String URL = "http://www.jobbsafari.se/jobb/management" + "/" + field + "/" + AC.get(area);
+                    JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.LEADERSHIP, "Jobbsafari", languageDetector);
                     Metrics m = crawlerInstance.scan();
                     updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
                 }

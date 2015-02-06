@@ -39,8 +39,6 @@ public class DatabaseUtils {
                     duplicateLinks++;
                 } else {
                     addToDatabaseTest(aJob);
-                    Company c = new Company(aJob.getCompany());
-                    addCompanyToDatabase(c);
                 }
             }
 //            System.out.println("now have " + jobs.size());
@@ -58,7 +56,7 @@ public class DatabaseUtils {
         //https://leopharma.easycruit.com/vacancy/1286566/111414?iso=dk
         //http://leopharma.easycruit.com/vacancy/1286566/111414?iso=dk
         List<Job> result = em.createQuery("SELECT j FROM Job j WHERE j.url like :url")
-                .setParameter("url", "%" + aJob.getUrl().replaceAll("https", "").replaceAll("http", "")).getResultList();
+                .setParameter("url", "%" + aJob.getUrl().replaceFirst("https", "").replaceFirst("http", "")).getResultList();
         if (!result.isEmpty()) {//if we found something
             duplicate = true;
         } else {//url check clean, check for title and company
@@ -74,7 +72,7 @@ public class DatabaseUtils {
                 //    Senior Java Developer - BESTSELLER IT
                 //    Senior Java Developer BESTSELLER IT
                 if (aJob.getTitle().contains("-")) {
-                    String jobTitleWithoutDash = aJob.getTitle().replaceAll(" - ", "");
+                    String jobTitleWithoutDash = aJob.getTitle().replaceAll(" - ", " ").replaceAll(" +", " ");
                     result = em.createQuery("SELECT j FROM Job j WHERE j.title = :title and j.company = :company")
                             .setParameter("title", jobTitleWithoutDash).setParameter("company", aJob.getCompany()).getResultList();
 
@@ -86,15 +84,21 @@ public class DatabaseUtils {
         }
         transaction.commit();
         em.close();
+
         return duplicate;
     }
 
     private boolean checkForSameCompanyAndTitleButDiffJobIDInURL(String url, List<Job> result) {
         boolean duplicate = false;
-        if (url.contains("novonordisk.com") || url.contains("oracle.taleo.net")
-                || url.contains("au.dk/om/") || url.contains("saxo.easycruit.com")
+        if (url.contains("novonordisk.com") || url.contains("taleo.net")
+                || url.contains("au.dk/om/") || url.contains("easycruit.com")
                 || url.contains("/find.ibm.jobs/") || url.contains("siemens.biz")
-                || url.contains("www.dongenergy.com")) {
+                || url.contains("www.dongenergy.com") || url.contains("www.pphr.dk")
+                || url.contains("hr.monjasa.com") || url.contains("www.3shape.com")
+                || url.contains("www.exiqon.com") || url.contains("dgs.emply.net")
+                || url.contains("delta.hr-manager.net") || url.contains("europeanenergy.dk")
+                || url.contains("www.nordea.com") || url.contains("www.lego.com")
+                || url.contains("jobsearch.maersk.com")) {
 
             //NovoNordisk format: http://www.novonordisk.com/careers/job_section/jp.asp?jobid=25257BR&joblng=uk&jobcnt=Denmark&type=1g&cid=JI-25257BR
             if (url.contains("novonordisk.com")) {
@@ -115,21 +119,44 @@ public class DatabaseUtils {
                 }
 
             }
-            //Oracle format: https://oracle.taleo.net/careersection/2/jobdetail.ftl?job=60658
-            if (url.contains("oracle.taleo.net")) {
+            //taleo.not formats: https://oracle.taleo.net/careersection/2/jobdetail.ftl?job=60658
+            //https://johnsoncontrols.taleo.net/careersection/emea_external_career_section_danish_denmark/jobdetail.ftl?job=1389729&lang=da
+            //https://ch.tbe.taleo.net/CH12/ats/careers/requisition.jsp?org=NASDAQOMX&cws=4&rid=2562
+            if (url.contains("taleo.net")) {
                 //for each job that has same title and company in DB, check ID
                 for (Job jobInDb : result) {
                     try {
 
-                        String jobInDbID = jobInDb.getUrl().split("job=")[1];
-                        String jobInListID = url.split("job=")[1];
+                        String jobInDbID = jobInDb.getUrl().split("job=")[1].split("&")[0];
+                        String jobInListID = url.split("job=")[1].split("&")[0];
                         if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
                             duplicate = true;
                         }
-                    } catch (Exception e) {
-                        //aioob ex because of url that didnt have right format. Set as dupli to remove it for safety
-                        duplicate = true;
-                        e.printStackTrace(System.out);
+                    } catch (Exception e1) {
+                        //aioob ex because of url that didnt have right format. check Other format:
+                        try {
+
+                            String jobInDbID = jobInDb.getUrl().split("job=")[1];
+                            String jobInListID = url.split("job=")[1];
+                            if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
+                                duplicate = true;
+                            }
+                        } catch (Exception e2) {
+                            //aioob ex because of url that didnt have right format. check Other format:
+                            try {
+
+                                String jobInDbID = jobInDb.getUrl().split("rid=")[1];
+                                String jobInListID = url.split("rid=")[1];
+                                if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
+                                    duplicate = true;
+                                }
+                            } catch (Exception e3) {
+                                //aioob ex because of url that didnt have right format. Set as dupli to remove it for safety
+                                duplicate = true;
+                                e3.printStackTrace(System.out);
+                            }
+                        }
+
                     }
                 }
             }
@@ -151,8 +178,9 @@ public class DatabaseUtils {
                     }
                 }
             }
-            //Saxo Bank format: http://saxo.easycruit.com/vacancy/1271153/61376?iso=gb
-            if (url.contains("saxo.easycruit.com")) {
+
+            //easycruit format: http://kmd.easycruit.com/vacancy/1321965/5058?iso=dk#.VMzhiWjF96A
+            if (url.contains("easycruit.com")) {
                 //for each job that has same title and company in DB, check ID
                 for (Job jobInDb : result) {
                     try {
@@ -172,27 +200,6 @@ public class DatabaseUtils {
 
             //IBM format: https://jobs3.netmedia1.com/cp/find.ibm.jobs/M/Mobile_UI_UX_Consultant/GBS-0695978/job/
             if (url.contains("/find.ibm.jobs/")) {
-                //for each job that has same title and company in DB, check ID
-                for (Job jobInDb : result) {
-                    try {
-
-                        int i = jobInDb.getUrl().split("/").length - 2;
-                        String jobInDbID = jobInDb.getUrl().split("/")[i];
-                        int j = url.split("/").length - 2;
-                        String jobInListID = url.split("/")[j];
-                        if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
-                            duplicate = true;
-                        }
-                    } catch (Exception e) {
-                        //aioob ex because of url that didnt have right format. Set as dupli to remove it for safety
-                        duplicate = true;
-                        e.printStackTrace(System.out);
-                    }
-                }
-            }
-
-            //LEO Pharma http://leopharma.easycruit.com/vacancy/1288266/106451?iso=dk
-            if (url.contains("leopharma.easycruit.com")) {
                 //for each job that has same title and company in DB, check ID
                 for (Job jobInDb : result) {
                     try {
@@ -416,6 +423,180 @@ public class DatabaseUtils {
                     }
                 }
             }
+            //People&Performance format: http://www.pphr.dk/job%20og%20karriere/ledige%20job/outgoing%20and%20ambitious%20plc%20programmer.aspx
+            if (url.contains("www.pphr.dk")) {
+                //for each job that has same title and company in DB, check ID
+                for (Job jobInDb : result) {
+                    try {
+
+                        String jobInDbID = jobInDb.getUrl().split("ledige%20job/")[1];
+                        String jobInListID = url.split("ledige%20job/")[1];
+                        if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
+                            duplicate = true;
+                        }
+                    } catch (Exception e) {
+                        //aioob ex because of url that didnt have right format. Set as dupli to remove it for safety
+                        duplicate = true;
+                        e.printStackTrace(System.out);
+                    }
+                }
+
+            }
+            //Monjasa format: https://hr.monjasa.com/Monjasa/Joblist/ShowJobOffer.aspx?dbalias=EposREC_Monjasa&lang=en&jobOfferEntityId=200&joblistId=1
+            if (url.contains("hr.monjasa.com")) {
+                //for each job that has same title and company in DB, check ID
+                for (Job jobInDb : result) {
+                    try {
+
+                        String jobInDbID = jobInDb.getUrl().split("jobOfferEntityId=")[1].split("&joblistId")[0];
+                        String jobInListID = url.split("jobOfferEntityId=d=")[1].split("&joblistId")[0];
+                        if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
+                            duplicate = true;
+                        }
+                    } catch (Exception e) {
+                        //aioob ex because of url that didnt have right format. Set as dupli to remove it for safety
+                        duplicate = true;
+                        e.printStackTrace(System.out);
+                    }
+                }
+            }
+            //3shape format: http://www.3shape.com/media/945323/Regional%20BusDevMgr%20-%20Ortho-Implant%20-%20ASIA.pdf
+            if (url.contains("www.3shape.com")) {
+                //for each job that has same title and company in DB, check ID
+                for (Job jobInDb : result) {
+                    try {
+
+                        String jobInDbID = jobInDb.getUrl().split("media/")[1].split("/")[0];
+                        String jobInListID = url.split("media/")[1].split("/")[0];
+                        if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
+                            duplicate = true;
+                        }
+                    } catch (Exception e) {
+                        //aioob ex because of url that didnt have right format. Set as dupli to remove it for safety
+                        duplicate = true;
+                        e.printStackTrace(System.out);
+                    }
+                }
+            }
+            //dgs format: https://dgs.emply.net/recruitment/VacancyAd.aspx?vacancyId=1358
+            if (url.contains("dgs.emply.net")) {
+                //for each job that has same title and company in DB, check ID
+                for (Job jobInDb : result) {
+                    try {
+
+                        String jobInDbID = jobInDb.getUrl().split("vacancyId=")[1];
+                        String jobInListID = url.split("vacancyId=")[1];
+                        if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
+                            duplicate = true;
+                        }
+                    } catch (Exception e) {
+                        //aioob ex because of url that didnt have right format. Set as dupli to remove it for safety
+                        duplicate = true;
+                        e.printStackTrace(System.out);
+                    }
+                }
+            }
+
+            //delta.hr-manager format: https://delta.hr-manager.net/ApplicationInit.aspx?cid=78&ProjectId=186991&DepartmentId=2064&MediaId=5
+            if (url.contains("delta.hr-manager.net")) {
+                //for each job that has same title and company in DB, check ID
+                for (Job jobInDb : result) {
+                    try {
+
+                        String jobInDbID = jobInDb.getUrl().split("ProjectId=")[1].split("&DepartmentId=")[0];
+                        String jobInListID = url.split("ProjectId=")[1].split("&DepartmentId=")[0];
+                        if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
+                            duplicate = true;
+                        }
+                    } catch (Exception e) {
+                        //aioob ex because of url that didnt have right format. Set as dupli to remove it for safety
+                        duplicate = true;
+                        e.printStackTrace(System.out);
+                    }
+                }
+            }
+
+            //europeanenergy format: http://europeanenergy.dk/fileadmin/ee_files/Karriere/Legal_Manager___4__yrs_exp_.pdf
+            if (url.contains("europeanenergy.dk")) {
+                //for each job that has same title and company in DB, check ID
+                for (Job jobInDb : result) {
+                    try {
+
+                        String jobInDbID = jobInDb.getUrl().split("/Karriere/")[1];
+                        String jobInListID = url.split("/Karriere/")[1];
+                        if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
+                            duplicate = true;
+                        }
+                    } catch (Exception e) {
+                        //aioob ex because of url that didnt have right format. Set as dupli to remove it for safety
+                        duplicate = true;
+                        e.printStackTrace(System.out);
+                    }
+                }
+            }
+
+            //Official nordea format: http://www.nordea.com/Karriere/View%2bjob/980954.html?shortId=257512&countryId=700a83fb-e796-482d-9ed6-e23dc4a28ada&areaId=00000000-0000-0000-0000-000000000000&categoryId=00000000-0000-0000-0000-000000000000
+            if (url.contains("www.nordea.com")) {
+                //for each job that has same title and company in DB, check ID
+                for (Job jobInDb : result) {
+                    try {
+
+                        String jobInDbID = jobInDb.getUrl().split("shortId=")[1].split("&")[0];
+                        String jobInListID = url.split("shortId=")[1].split("&")[0];
+                        if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
+                            duplicate = true;
+                        }
+                    } catch (Exception e) {
+                        //aioob ex because of url that didnt have right format. Set as dupli to remove it for safety
+                        duplicate = true;
+                        e.printStackTrace(System.out);
+                    }
+                }
+            }
+            //LEGO format: http://www.lego.com/da-dk/careers/jobdescriptionpage?id=52471882&title=Senior%20Global%20Mobility%20Consultant
+            // OR        : http://www.lego.com/da-dk/careers/jobdescriptionpage?title=Supplier+Quality+Specialist&id=52509532
+            if (url.contains("www.lego.com")) {
+                //for each job that has same title and company in DB, check ID
+                for (Job jobInDb : result) {
+                    String jobInDbID;
+                    String jobInListID;
+                    try {
+                        jobInDbID = jobInDb.getUrl().split("id=")[1].split("&title=")[0];
+                    } catch (Exception e) {
+                        //aioob ex because of url that didnt have the right format. Try second format
+                        jobInDbID = jobInDb.getUrl().split("id=")[1];
+                    }
+
+                    try {
+                        jobInListID = url.split("id=")[1].split("&title=")[0];
+                    } catch (Exception e) {
+                        //aioob ex because of url that didnt have the right format. Try second format
+                        jobInListID = url.split("id=")[1].split("&title=")[0];
+                    }
+                    if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
+                        duplicate = true;
+                    }
+                }
+            }
+
+            //Maersk format, AFTER HOMOGENIZE: https://jobsearch.maersk.com/vacancies/publication?PINST=005056A52F591EE4A59878C61A774DD1
+            if (url.contains("jobsearch.maersk.com")) {
+                //for each job that has same title and company in DB, check ID
+                for (Job jobInDb : result) {
+                    try {
+
+                        String jobInDbID = jobInDb.getUrl().split("PINST=")[1];
+                        String jobInListID = url.split("PINST=")[1];
+                        if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
+                            duplicate = true;
+                        }
+                    } catch (Exception e) {
+                        //aioob ex because of url that didnt have right format. Set as dupli to remove it for safety
+                        duplicate = true;
+                        e.printStackTrace(System.out);
+                    }
+                }
+            }
 
         } else {//its not of a company whose url format allows me to take its job ID safely, just delete it
 //                    System.out.println("DUPLICATE TITLE/COMPANY: " + aJob.getTitle());
@@ -451,34 +632,34 @@ public class DatabaseUtils {
     }
 
     public void addCompanyToDatabase(Company aCompany) {
-//        EntityManager em = emf.createEntityManager();
-//        EntityTransaction transaction = em.getTransaction();
-//        transaction.begin();
-//
-//        List<Company> result = em.createQuery("SELECT c FROM Company c WHERE c.companyName = :cn").setParameter("cn", aCompany.getCompanyName()).getResultList();
-//        if (!result.isEmpty()) {//company already in DB, do nothing
-//            transaction.commit();
-//            em.close();
-//        } else {//company not already in DB, save logo in file, and save company in DB
-//            try {
-//                //save logo in memory
-//
-//                //save company
-//                try {
-//                    em.persist(aCompany);
-//                } catch (Exception e) {
-//                    System.err.println(e.getMessage());
-//                    transaction.rollback();
-//                }
-//                transaction.commit();
-//                em.close();
-//            } catch (Exception e) {
-//                //somethign went wrong while saving logo, close em and transaction
-//                System.err.println(e.getMessage());
-//                transaction.rollback();
-//                em.close();
-//            }
-//        }
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        transaction.begin();
+
+        List<Company> result = em.createQuery("SELECT c FROM Company c WHERE c.companyName = :cn").setParameter("cn", aCompany.getCompanyName()).getResultList();
+        if (!result.isEmpty()) {//company already in DB, do nothing
+            transaction.commit();
+            em.close();
+        } else {//company not already in DB, save logo in file, and save company in DB
+            try {
+                //save logo in memory
+
+                //save company
+                try {
+                    em.persist(aCompany);
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                    transaction.rollback();
+                }
+                transaction.commit();
+                em.close();
+            } catch (Exception e) {
+                //somethign went wrong while saving logo, close em and transaction
+                System.err.println(e.getMessage());
+                transaction.rollback();
+                em.close();
+            }
+        }
     }
 
     public void addMetricToDatabase(Metrics aMetric) {

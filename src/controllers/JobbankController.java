@@ -146,23 +146,7 @@ public class JobbankController {
             e1.printStackTrace(System.out);
         }
 
-        //scan ledelse ######################################################################
-        try {
-            String[] fields = {"Organisation & Ledelse", "Human Resources"};
-            for (AdmDivision d : allAdmDivisions) {
-                for (String subd : d.subdivisions) {
-                    for (String field : fields) {
-                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawlerInstance = new JobbankCrawler(URL, d.division, JobCategories.LEADERSHIP, "Jobbank", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
-                    }
-                }
 
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace(System.out);
-        }
 
         //scan handel ######################################################################
         //#######nothing like this in this site
@@ -242,6 +226,24 @@ public class JobbankController {
             e1.printStackTrace(System.out);
         }
 
+                //scan ledelse ######################################################################
+        try {
+            String[] fields = {"Organisation & Ledelse", "Human Resources"};
+            for (AdmDivision d : allAdmDivisions) {
+                for (String subd : d.subdivisions) {
+                    for (String field : fields) {
+                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
+                        JobbankCrawler crawlerInstance = new JobbankCrawler(URL, d.division, JobCategories.LEADERSHIP, "Jobbank", languageDetector);
+                        Metrics m = crawlerInstance.scan();
+                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    }
+                }
+
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+        }
+        
         //scan oevrige ######################################################################
         //#######nothing like this in this site
         System.out.println("METRICS:");

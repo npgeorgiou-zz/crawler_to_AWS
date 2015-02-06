@@ -287,7 +287,7 @@ public class MonsterCrawler {
                             jobAnnouncer = filter.homogeniseCompanyName(jobAnnouncer);
                             jobURL = filter.homogeniseURL(jobURL);
 
-                            Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, city, foundAt, fields);
+                            Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, mainText, 1, city, foundAt, fields);
 
                             Field f = new Field(jobCategory);
                             identifiedJob.addField(f);

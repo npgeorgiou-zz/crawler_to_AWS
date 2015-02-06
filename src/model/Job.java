@@ -11,13 +11,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.CascadeType;
-import static javax.persistence.CascadeType.ALL;
-
 import javax.persistence.Column;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Temporal;
-import javax.persistence.Transient;
 
 @Entity
 @Table(name = "jobs")
@@ -45,21 +42,29 @@ public class Job implements Serializable {
     Date postDate;
 
     @Column()
+    String text;
+
+    @Column()
+    int paidJob;
+
+    @Column()
     String area;
 
     @Column()
     String foundAt;
 
-    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy="job", cascade= CascadeType.ALL)
     private List<Field> fields;
 
     //constructors
-    public Job(String title, String company, URL url, Date postDate, String area,
+    public Job(String title, String company, URL url, Date postDate, String text, int paidJob, String area,
             String foundAt, ArrayList<Field> fields) {
         this.title = title;
         this.company = company;
         this.url = url.toString();
         this.postDate = postDate;
+        this.text = text;
+        this.paidJob = paidJob;
         this.area = area;
         this.foundAt = foundAt;
         this.fields = fields;
@@ -123,6 +128,22 @@ public class Job implements Serializable {
 
     public void setJobCity(String jobCity) {
         this.area = jobCity;
+    }
+
+    public int getPaidJob() {
+        return paidJob;
+    }
+
+    public void setPaidJob(int paidJob) {
+        this.paidJob = paidJob;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 
     public String getTitle() {

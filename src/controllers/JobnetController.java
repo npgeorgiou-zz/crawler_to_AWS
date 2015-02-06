@@ -98,24 +98,6 @@ class JobnetController {
             e1.printStackTrace(System.out);
         }
 
-        //scan ledelse ######################################################################
-        try {
-            String[] fields = {"Ledelse"};
-
-            for (String area : areas) {
-                for (String field : fields) {
-                    String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawlerInstance = new JobnetCrawler(URL, area, JobCategories.LEADERSHIP, "Jobnet", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
-
-                }
-            }
-
-        } catch (IOException e1) {
-            e1.printStackTrace(System.out);
-        }
-
         //scan handel ######################################################################
         try {
             String[] fields = {"Hotel, restauration, køkken, kantine", "Nærings- og nydelsesmiddel",
@@ -217,6 +199,24 @@ class JobnetController {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
                     JobnetCrawler crawlerInstance = new JobnetCrawler(URL, area, JobCategories.MED_SOC, "Jobnet", languageDetector);
+                    Metrics m = crawlerInstance.scan();
+                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+
+                }
+            }
+
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+        }
+
+        //scan ledelse ######################################################################
+        try {
+            String[] fields = {"Ledelse"};
+
+            for (String area : areas) {
+                for (String field : fields) {
+                    String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
+                    JobnetCrawler crawlerInstance = new JobnetCrawler(URL, area, JobCategories.LEADERSHIP, "Jobnet", languageDetector);
                     Metrics m = crawlerInstance.scan();
                     updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
 
