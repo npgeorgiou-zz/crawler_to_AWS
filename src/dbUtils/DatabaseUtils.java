@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import model.Company;
 import model.Field;
 
@@ -638,27 +639,20 @@ public class DatabaseUtils {
 
         List<Company> result = em.createQuery("SELECT c FROM Company c WHERE c.companyName = :cn").setParameter("cn", aCompany.getCompanyName()).getResultList();
         if (!result.isEmpty()) {//company already in DB, do nothing
+            //TODO save logo is logo different
             transaction.commit();
             em.close();
-        } else {//company not already in DB, save logo in file, and save company in DB
+        } else {//company not already in DB, save company in DB
+            //save company
             try {
-                //save logo in memory
-
-                //save company
-                try {
-                    em.persist(aCompany);
-                } catch (Exception e) {
-                    System.err.println(e.getMessage());
-                    transaction.rollback();
-                }
-                transaction.commit();
-                em.close();
+                em.persist(aCompany);
             } catch (Exception e) {
-                //somethign went wrong while saving logo, close em and transaction
                 System.err.println(e.getMessage());
                 transaction.rollback();
-                em.close();
             }
+            transaction.commit();
+            em.close();
+
         }
     }
 
@@ -691,6 +685,25 @@ public class DatabaseUtils {
 //            em.createNativeQuery("TRUNCATE TABLE jobs_test_final").executeUpdate();
 //            em.createNativeQuery("TRUNCATE TABLE fields_test_final").executeUpdate();
 //            em.createNativeQuery("alter table fields_test_final disable constraint fk_jobs_test_final").executeUpdate();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            transaction.rollback();
+        }
+        transaction.commit();
+        em.close();
+    }
+
+    public void registerDbChange() {
+        long unixTime = System.currentTimeMillis() / 1000L;
+        
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        transaction.begin();
+
+        try {
+            Query query = em.createNativeQuery("UPDATE db_updated SET updated = ? WHERE ID = 1");
+            query.setParameter(1, unixTime);
+            query.executeUpdate();      
         } catch (Exception e) {
             System.err.println(e.getMessage());
             transaction.rollback();

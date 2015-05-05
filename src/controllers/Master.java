@@ -27,9 +27,7 @@ public class Master {
     private static void scan() {
 
         dbUtils.flushDatabase();
-
-
-
+        
         //Jobbank
         Metrics jbm = new JobbankController().start();
         updateMetrics(finalM, jbm.getAllJobs(), jbm.getJobsInEnglish(), jbm.getDuplicateJobs(), jbm.getExceptions());
@@ -67,6 +65,10 @@ public class Master {
 //        dbUtils.addMetricToDatabase(jsm);
 
         soutMetrics(finalM);
+        
+        dbUtils.registerDbChange();
+        
+
     }
 
     private static void updateMetrics(Metrics m, int allJobs, int jobsInEnglish, int duplicateJobs, int exceptions) {
