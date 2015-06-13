@@ -3,18 +3,18 @@ package controllers;
 import model.Metrics;
 import crawlers.MonsterCrawler;
 import com.cybozu.labs.langdetect.LangDetectException;
+import config.Config;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import crawlerUtils.LangDetect;
 import sharedUtilities.JobCategories;
 
-class MonsterController {
+public class MonsterController {
+    
     //declare variables
-
+    private final String siteName;
     private static LangDetect languageDetector;
-    private static final String profilesPath = "C:\\Users\\ksptsinplanet\\git\\crawler\\Crawler\\profiles";
-
     private final Metrics METRICS;
 
     Map<String, String> AC;
@@ -22,7 +22,8 @@ class MonsterController {
 
     //constructor
     public MonsterController() {
-        METRICS = new Metrics("Monster");
+        siteName = "Monster";
+        METRICS = new Metrics(siteName);
 
         setUpLangDetector();
 
@@ -45,9 +46,9 @@ class MonsterController {
 
             for (String area : areas) {
                 String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                MonsterCrawler crawlerInstance = new MonsterCrawler(URL, area, JobCategories.ENGINEER, "Monster", languageDetector);
-                Metrics m = crawlerInstance.scan();
-                updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.ENGINEER, siteName, languageDetector);
+                Metrics m = crawler.scan();
+                METRICS.updateMetrics(m);
             }
 
         } catch (IOException e1) {
@@ -60,9 +61,9 @@ class MonsterController {
 
             for (String area : areas) {
                 String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                MonsterCrawler crawlerInstance = new MonsterCrawler(URL, area, JobCategories.IT, "Monster", languageDetector);
-                Metrics m = crawlerInstance.scan();
-                updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.IT, siteName, languageDetector);
+                Metrics m = crawler.scan();
+                METRICS.updateMetrics(m);
             }
 
         } catch (IOException e1) {
@@ -76,9 +77,9 @@ class MonsterController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawlerInstance = new MonsterCrawler(URL, area, JobCategories.SERVICE, "Monster", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.SERVICE, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -92,9 +93,9 @@ class MonsterController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawlerInstance = new MonsterCrawler(URL, area, JobCategories.SERVICE, "Monster", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.SERVICE, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -108,9 +109,9 @@ class MonsterController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawlerInstance = new MonsterCrawler(URL, area, JobCategories.BUSINESS, "Monster", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.BUSINESS, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -123,9 +124,9 @@ class MonsterController {
 
             for (String area : areas) {
                 String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                MonsterCrawler crawlerInstance = new MonsterCrawler(URL, area, JobCategories.RES_EDU, "Monster", languageDetector);
-                Metrics m = crawlerInstance.scan();
-                updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.RES_EDU, siteName, languageDetector);
+                Metrics m = crawler.scan();
+                METRICS.updateMetrics(m);
             }
 
         } catch (IOException e1) {
@@ -139,9 +140,9 @@ class MonsterController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawlerInstance = new MonsterCrawler(URL, area, JobCategories.BUSINESS, "Monster", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.BUSINESS, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -156,9 +157,9 @@ class MonsterController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawlerInstance = new MonsterCrawler(URL, area, JobCategories.LEADERSHIP, "Monster", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.LEADERSHIP, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -168,74 +169,18 @@ class MonsterController {
 
 //        //scan social ######################################################################
 //        //#######nothing like this in this site
-//        try {
-//            String field = "Finansiering-og-regnskab";
-//            
-//
-//            for (String area : areas) {
-//                MonsterCrawler crawlerInstance = new MonsterCrawler("http://jobsoeg.monster.dk",area, "medicalAndSocial");                    CrawlerMetrics m = crawlerInstance.scan();
-//
-//                    allJobs += m.getAllJobs();
-//                    jobsInEnglish += m.getJobsInEnglish();
-//                    duplicateJobs += m.getDuplicateJobs();
-//                    
-//                    exceptions += m.getExceptions();
-//            }
-//
-//        } catch (IOException e1) {
-//            e1.printStackTrace(System.out);
-//        }
 //        //scan oevrige ######################################################################
 //        //#######nothing like this in this site
-//        try {
-//            String fields[] = {"frivilligt", "kontorelev", "student", "studiepraktik", "oevrige", "elev", "kurseroevrige"};                    CrawlerMetrics m = crawlerInstance.scan();
-//
-//                    allJobs += m.getAllJobs();
-//                    jobsInEnglish += m.getJobsInEnglish();
-//                    duplicateJobs += m.getDuplicateJobs();
-//                    
-//                    exceptions += m.getExceptions();
-//            
-//            for (String field : fields) {
-//                for (String area : areas) {
-//                    MonsterCrawler crawlerInstance = new MonsterCrawler("http://www.jobindex.dk/job/oevrige",area, "studentAndInternshipAndOther");                    CrawlerMetrics m = crawlerInstance.scan();
-//
-//                    allJobs += m.getAllJobs();
-//                    jobsInEnglish += m.getJobsInEnglish();
-//                    duplicateJobs += m.getDuplicateJobs();
-//                    
-//                    exceptions += m.getExceptions();
-//                }
-//            }
-//        } catch (IOException e1) {
-//            e1.printStackTrace(System.out);
-//        }
         //metrics
-        System.out.println("METRICS:");
-        System.out.println("Jobs in site: " + "\t" + METRICS.getAllJobs());
-        System.out.println("Jobs in english: " + "\t" + METRICS.getJobsInEnglish());
-        System.out.println("Duplicates: " + "\t" + METRICS.getDuplicateJobs());
-        System.out.println("Exceptions: " + "\t" + METRICS.getExceptions());
-
-        //set metrics to return
-        METRICS.setAllJobs(METRICS.getAllJobs());
-        METRICS.setJobsInEnglish(METRICS.getJobsInEnglish());
-        METRICS.setDuplicateJobs(METRICS.getDuplicateJobs());
-        METRICS.setExceptions(METRICS.getExceptions());
+        System.out.println(METRICS.toString());
         return METRICS;
-    }
-
-    private void updateMetrics(Metrics m, int allJobs, int jobsInEnglish, int duplicateJobs, int exceptions) {
-        m.setAllJobs(METRICS.getAllJobs() + allJobs);
-        m.setJobsInEnglish(METRICS.getJobsInEnglish() + jobsInEnglish);
-        m.setDuplicateJobs(METRICS.getDuplicateJobs() + duplicateJobs);
-        m.setExceptions(METRICS.getExceptions() + exceptions);
     }
 
     //Initialize the language detector with the profiles
     private void setUpLangDetector() {
         languageDetector = new LangDetect();
         try {
+            String profilesPath = new Config().getProp("profiles_path");
             languageDetector.init(profilesPath);
         } catch (LangDetectException lde) {
             lde.printStackTrace(System.out);

@@ -3,6 +3,7 @@ package controllers;
 import model.Metrics;
 import crawlers.JobindexCrawler;
 import com.cybozu.labs.langdetect.LangDetectException;
+import config.Config;
 import java.io.IOException;
 import java.util.Map;
 import crawlerUtils.LangDetect;
@@ -11,12 +12,11 @@ import java.util.Arrays;
 import java.util.List;
 import sharedUtilities.JobCategories;
 
-class JobindexController {
+public class JobindexController {
 
     //declare variables
+    private final String siteName;
     private LangDetect languageDetector;
-    private static final String profilesPath = "C:\\Users\\ksptsinplanet\\git\\crawler\\Crawler\\profiles";
-
     private final Metrics METRICS;
 
     Map<String, String> AC;
@@ -25,7 +25,8 @@ class JobindexController {
 
     //constructor
     public JobindexController() {
-        METRICS = new Metrics("Jobindex");
+        siteName = "Jobindex";
+        METRICS = new Metrics(siteName);
 
         setUpLangDetector();
 
@@ -69,9 +70,9 @@ class JobindexController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://tech.jobindex.dk/job/ingenioer" + "/" + field + "/" + subd;
-                        JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.ENGINEER, "Jobindex", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, JobCategories.ENGINEER, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
 
                     }
                 }
@@ -87,9 +88,9 @@ class JobindexController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://it.jobindex.dk/job/it" + "/" + field + "/" + subd;
-                        JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.IT, "Jobindex", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, JobCategories.IT, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
 
                     }
                 }
@@ -105,9 +106,9 @@ class JobindexController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/handel" + "/" + field + "/" + subd;
-                        JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.SERVICE, "Jobindex", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, JobCategories.SERVICE, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
 
                     }
                 }
@@ -122,9 +123,9 @@ class JobindexController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/industri" + "/" + field + "/" + subd;
-                        JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.SERVICE, "Jobindex", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, JobCategories.SERVICE, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
 
                     }
                 }
@@ -139,9 +140,9 @@ class JobindexController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/salg" + "/" + field + "/" + subd;
-                        JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.BUSINESS, "Jobindex", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, JobCategories.BUSINESS, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
 
                     }
                 }
@@ -157,9 +158,9 @@ class JobindexController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/undervisning" + "/" + field + "/" + subd;
-                        JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.RES_EDU, "Jobindex", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, JobCategories.RES_EDU, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
 
                     }
                 }
@@ -177,9 +178,9 @@ class JobindexController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/kontor" + "/" + field + "/" + subd;
-                        JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.BUSINESS, "Jobindex", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, JobCategories.BUSINESS, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
 
                     }
                 }
@@ -188,9 +189,9 @@ class JobindexController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields2) {
                         String URL = "http://www.jobindex.dk/job/ledelse" + "/" + field + "/" + subd;
-                        JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.BUSINESS, "Jobindex", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, JobCategories.BUSINESS, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
 
                     }
                 }
@@ -206,9 +207,9 @@ class JobindexController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/social" + "/" + field + "/" + subd;
-                        JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.MED_SOC, "Jobindex", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, JobCategories.MED_SOC, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
 
                     }
                 }
@@ -224,9 +225,9 @@ class JobindexController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/oevrige" + "/" + field + "/" + subd;
-                        JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.STUDENT, "Jobindex", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, JobCategories.STUDENT, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
 
                     }
                 }
@@ -242,9 +243,9 @@ class JobindexController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/ledelse" + "/" + field + "/" + subd;
-                        JobindexCrawler crawlerInstance = new JobindexCrawler(URL, d.division, JobCategories.LEADERSHIP, "Jobindex", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, JobCategories.LEADERSHIP, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
 
                     }
                 }
@@ -253,17 +254,8 @@ class JobindexController {
             e1.printStackTrace(System.out);
         }
 
-        System.out.println("METRICS:");
-        System.out.println("Jobs in site: " + "\t" + METRICS.getAllJobs());
-        System.out.println("Jobs in english: " + "\t" + METRICS.getJobsInEnglish());
-        System.out.println("Duplicates: " + "\t" + METRICS.getDuplicateJobs());
-        System.out.println("Exceptions: " + "\t" + METRICS.getExceptions());
-
-        //set metrics to return
-        METRICS.setAllJobs(METRICS.getAllJobs());
-        METRICS.setJobsInEnglish(METRICS.getJobsInEnglish());
-        METRICS.setDuplicateJobs(METRICS.getDuplicateJobs());
-        METRICS.setExceptions(METRICS.getExceptions());
+        //metrics
+        System.out.println(METRICS.toString()); 
         return METRICS;
     }
 
@@ -271,21 +263,14 @@ class JobindexController {
     private void setUpLangDetector() {
         languageDetector = new LangDetect();
         try {
+            String profilesPath = new Config().getProp("profiles_path");
             languageDetector.init(profilesPath);
         } catch (LangDetectException lde) {
             lde.printStackTrace(System.out);
         }
     }
 
-    private void updateMetrics(Metrics m, int allJobs, int jobsInEnglish, int duplicateJobs, int exceptions) {
-        m.setAllJobs(METRICS.getAllJobs() + allJobs);
-        m.setJobsInEnglish(METRICS.getJobsInEnglish() + jobsInEnglish);
-        m.setDuplicateJobs(METRICS.getDuplicateJobs() + duplicateJobs);
-        m.setExceptions(METRICS.getExceptions() + exceptions);
-    }
-
     class AdmDivision {
-
         //variables
         String division;
         List<String> subdivisions;

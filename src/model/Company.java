@@ -24,7 +24,7 @@ public class Company implements Serializable {
     @Column()
     String companyName;
     
-//    @Column()
+    @Column()
     String logoPath;
     
     //constructors
@@ -32,9 +32,9 @@ public class Company implements Serializable {
         this.companyName = companyName;
         this.logoPath = logoPath;
     }
-    public Company(String companyName) {
-        this.companyName = companyName;
-    }
+//    public Company(String companyName) {
+//        this.companyName = companyName;
+//    }
     
     public Company() {
 

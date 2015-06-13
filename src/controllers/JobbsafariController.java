@@ -3,18 +3,18 @@ package controllers;
 import model.Metrics;
 import crawlers.JobbsafariCrawler;
 import com.cybozu.labs.langdetect.LangDetectException;
+import config.Config;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import crawlerUtils.LangDetect;
 import sharedUtilities.JobCategories;
 
-class JobbsafariController {
+public class JobbsafariController {
 
     //declare variables
+    private final String siteName;
     private LangDetect languageDetector;
-    private static final String profilesPath = "C:\\Users\\ksptsinplanet\\git\\crawler\\Crawler\\profiles";
-
     private final Metrics METRICS;
 
     Map<String, String> AC;
@@ -22,7 +22,8 @@ class JobbsafariController {
 
     //constructor
     public JobbsafariController() {
-        METRICS = new Metrics("Jobbsafari");
+        siteName = "Jobbsafari";
+        METRICS = new Metrics(siteName);
 
         setUpLangDetector();
 
@@ -41,9 +42,9 @@ class JobbsafariController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/teknik" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.ENGINEER, "Jobbsafari", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, JobCategories.ENGINEER, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
         } catch (IOException e1) {
@@ -57,9 +58,9 @@ class JobbsafariController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/it" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.IT, "Jobbsafari", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, JobCategories.IT, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
         } catch (IOException e1) {
@@ -73,9 +74,9 @@ class JobbsafariController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/detaljhandel" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.SERVICE, "Jobbsafari", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, JobCategories.SERVICE, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
         } catch (IOException e1) {
@@ -88,9 +89,9 @@ class JobbsafariController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/industri" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.SERVICE, "Jobbsafari", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, JobCategories.SERVICE, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
         } catch (IOException e1) {
@@ -103,9 +104,9 @@ class JobbsafariController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/forsaljning" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.BUSINESS, "Jobbsafari", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, JobCategories.BUSINESS, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
         } catch (IOException e1) {
@@ -118,9 +119,9 @@ class JobbsafariController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/undervisning" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.RES_EDU, "Jobbsafari", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, JobCategories.RES_EDU, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
         } catch (IOException e1) {
@@ -133,18 +134,18 @@ class JobbsafariController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/kontor" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.BUSINESS, "Jobbsafari", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, JobCategories.BUSINESS, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
             for (String field : fields2) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/management" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.BUSINESS, "Jobbsafari", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, JobCategories.BUSINESS, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -158,9 +159,9 @@ class JobbsafariController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/socialt" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.MED_SOC, "Jobbsafari", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, JobCategories.MED_SOC, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
         } catch (IOException e1) {
@@ -172,9 +173,9 @@ class JobbsafariController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/andra" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.STUDENT, "Jobbsafari", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, JobCategories.STUDENT, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
         } catch (IOException e1) {
@@ -188,26 +189,17 @@ class JobbsafariController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/management" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawlerInstance = new JobbsafariCrawler(URL, area, JobCategories.LEADERSHIP, "Jobbsafari", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, JobCategories.LEADERSHIP, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
         } catch (IOException e1) {
             e1.printStackTrace(System.out);
         }
 
-        System.out.println("METRICS:");
-        System.out.println("Jobs in site: " + "\t" + METRICS.getAllJobs());
-        System.out.println("Jobs in english: " + "\t" + METRICS.getJobsInEnglish());
-        System.out.println("Duplicates: " + "\t" + METRICS.getDuplicateJobs());
-        System.out.println("Exceptions: " + "\t" + METRICS.getExceptions());
-
-        //set metrics to return
-        METRICS.setAllJobs(METRICS.getAllJobs());
-        METRICS.setJobsInEnglish(METRICS.getJobsInEnglish());
-        METRICS.setDuplicateJobs(METRICS.getDuplicateJobs());
-        METRICS.setExceptions(METRICS.getExceptions());
+        //metrics
+        System.out.println(METRICS.toString());
         return METRICS;
     }
 
@@ -215,16 +207,10 @@ class JobbsafariController {
     private void setUpLangDetector() {
         languageDetector = new LangDetect();
         try {
+            String profilesPath = new Config().getProp("profiles_path");
             languageDetector.init(profilesPath);
         } catch (LangDetectException lde) {
             lde.printStackTrace(System.out);
         }
-    }
-
-    private void updateMetrics(Metrics m, int allJobs, int jobsInEnglish, int duplicateJobs, int exceptions) {
-        m.setAllJobs(METRICS.getAllJobs() + allJobs);
-        m.setJobsInEnglish(METRICS.getJobsInEnglish() + jobsInEnglish);
-        m.setDuplicateJobs(METRICS.getDuplicateJobs() + duplicateJobs);
-        m.setExceptions(METRICS.getExceptions() + exceptions);
     }
 }

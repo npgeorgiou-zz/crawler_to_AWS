@@ -1,5 +1,6 @@
 package model;
 
+import crawlerUtils.Filter;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -55,13 +56,18 @@ public class Job implements Serializable {
 
     @OneToMany(mappedBy="job", cascade= CascadeType.ALL)
     private List<Field> fields;
+    
+    
 
     //constructors
     public Job(String title, String company, URL url, Date postDate, String text, int paidJob, String area,
             String foundAt, ArrayList<Field> fields) {
-        this.title = title;
-        this.company = company;
-        this.url = url.toString();
+        
+        Filter filter = new Filter();
+        
+        this.title = filter.homogeniseJobTitle(title);
+        this.company = filter.homogeniseCompanyName(company);
+        this.url = filter.homogeniseURL(url.toString());
         this.postDate = postDate;
         this.text = text;
         this.paidJob = paidJob;

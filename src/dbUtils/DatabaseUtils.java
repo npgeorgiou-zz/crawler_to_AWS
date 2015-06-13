@@ -60,10 +60,12 @@ public class DatabaseUtils {
                 .setParameter("url", "%" + aJob.getUrl().replaceFirst("https", "").replaceFirst("http", "")).getResultList();
         if (!result.isEmpty()) {//if we found something
             duplicate = true;
-        } else {//url check clean, check for title and company
+        } else {
+            //url check clean, check for title and company
             result = em.createQuery("SELECT j FROM Job j WHERE j.title = :title and j.company = :company")
                     .setParameter("title", aJob.getTitle()).setParameter("company", aJob.getCompany()).getResultList();
-            if (!result.isEmpty()) {//if we found something
+            if (!result.isEmpty()) {
+                //if we found something
                 //Some deletes will be wrong. E.g. NN or siemens have multiple positions with the same name. So:
                 //Check URL format in big companies and try to get job id from url. e.g. split("id=")[1].split("&")
                 //if numbers are different, then dont delete.
@@ -106,7 +108,6 @@ public class DatabaseUtils {
                 //for each job that has same title and company in DB, check ID
                 for (Job jobInDb : result) {
                     try {
-
                         String jobInDbID = jobInDb.getUrl().split("jobid=")[1].split("&")[0];
                         String jobInListID = url.split("jobid=")[1].split("&")[0];
                         if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
@@ -559,24 +560,40 @@ public class DatabaseUtils {
             if (url.contains("www.lego.com")) {
                 //for each job that has same title and company in DB, check ID
                 for (Job jobInDb : result) {
-                    String jobInDbID;
-                    String jobInListID;
+                    // initialize variables
+                    String jobInDbID = "something";
+                    String jobInListID = "something else";
+                    
                     try {
                         jobInDbID = jobInDb.getUrl().split("id=")[1].split("&title=")[0];
                     } catch (Exception e) {
                         //aioob ex because of url that didnt have the right format. Try second format
+                        e.printStackTrace(System.out);
+                    }
+                    try {
                         jobInDbID = jobInDb.getUrl().split("id=")[1];
+                    } catch (Exception e) {
+                        //aioob ex because of url that didnt have the right format
+                        e.printStackTrace(System.out);
                     }
 
                     try {
                         jobInListID = url.split("id=")[1].split("&title=")[0];
                     } catch (Exception e) {
                         //aioob ex because of url that didnt have the right format. Try second format
-                        jobInListID = url.split("id=")[1].split("&title=")[0];
+                        e.printStackTrace(System.out);
+                    }
+
+                    try {
+                        jobInListID = url.split("id=")[1].split("id=")[1];
+                    } catch (Exception e) {
+                        //aioob ex because of url that didnt have the right format
+                        e.printStackTrace(System.out);
                     }
                     if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
                         duplicate = true;
                     }
+
                 }
             }
 
@@ -585,7 +602,6 @@ public class DatabaseUtils {
                 //for each job that has same title and company in DB, check ID
                 for (Job jobInDb : result) {
                     try {
-
                         String jobInDbID = jobInDb.getUrl().split("PINST=")[1];
                         String jobInListID = url.split("PINST=")[1];
                         if (jobInDbID.equals(jobInListID)) {//then it is the same job, delete it
@@ -613,14 +629,14 @@ public class DatabaseUtils {
         EntityTransaction transaction = em.getTransaction();
         transaction.begin();
         try {
-            //System.out.println("________________________________________________" + "\r\n");
+//            System.out.println("________________________________________________" + "\r\n");
 
             em.persist(aJob);
             em.flush();
-            //System.out.println(">>> " + job.getID() + " " + job.getTitle());
+//            System.out.println(">>> " + aJob.getID() + " " + aJob.getTitle());
             for (Field f : aJob.getFields()) {
                 f.setJob(aJob);
-                //System.out.println(">> " + f.toString());
+//                System.out.println(">> " + f.toString());
                 em.persist(f);
             }
 
@@ -695,7 +711,7 @@ public class DatabaseUtils {
 
     public void registerDbChange() {
         long unixTime = System.currentTimeMillis() / 1000L;
-        
+
         EntityManager em = emf.createEntityManager();
         EntityTransaction transaction = em.getTransaction();
         transaction.begin();
@@ -703,7 +719,7 @@ public class DatabaseUtils {
         try {
             Query query = em.createNativeQuery("UPDATE db_updated SET updated = ? WHERE ID = 1");
             query.setParameter(1, unixTime);
-            query.executeUpdate();      
+            query.executeUpdate();
         } catch (Exception e) {
             System.err.println(e.getMessage());
             transaction.rollback();

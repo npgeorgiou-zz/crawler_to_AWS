@@ -29,7 +29,7 @@ public class Metrics implements Serializable {
     private String crawler;
 
     @Column()
-    private int jobsInSite;
+    private int allJobs;
 
     @Column()
     private int jobsInEnglish;
@@ -48,7 +48,7 @@ public class Metrics implements Serializable {
     public Metrics(String crawler) {
         this.scanDate = new Date();
         this.crawler = crawler;
-        this.jobsInSite = 0;
+        this.allJobs = 0;
         this.jobsInEnglish = 0;
         this.duplicateJobs = 0;
         this.exceptions = 0;
@@ -96,19 +96,54 @@ public class Metrics implements Serializable {
     }
 
     public int getAllJobs() {
-        return jobsInSite;
+        return allJobs;
     }
 
     public void setAllJobs(int allJobs) {
-        this.jobsInSite = allJobs;
+        this.allJobs = allJobs;
     }
 
     public int getDuplicateJobs() {
         return duplicateJobs;
     }
 
+    public void incrementJobs() {
+        this.allJobs = this.allJobs + 1;
+    }
+
+    public void incrementJobsInEnglish() {
+        this.jobsInEnglish = this.jobsInEnglish + 1;
+    }
+
+    public void incrementDuplicateJobs() {
+        this.duplicateJobs = this.duplicateJobs + 1;
+    }
+
+    public void incrementExceptions() {
+        this.exceptions = this.exceptions + 1;
+    }
+
     public void setDuplicateJobs(int duplicateJobs) {
         this.duplicateJobs = duplicateJobs;
+    }
+
+    public void updateMetrics(Metrics toBeAdded) {
+        this.setAllJobs(this.getAllJobs() + toBeAdded.getAllJobs());
+        this.setJobsInEnglish(this.getJobsInEnglish() + toBeAdded.getJobsInEnglish());
+        this.setDuplicateJobs(this.getDuplicateJobs() + toBeAdded.getDuplicateJobs());
+        this.setExceptions(this.getExceptions() + toBeAdded.getExceptions());
+    }
+
+    @Override
+    public String toString() {
+        String nl = System.lineSeparator();
+        String result = getCrawler() + " METRICS:" + nl
+                + "Jobs in site: " + "\t" + getAllJobs() + nl
+                + "Jobs in english: " + "\t" + getJobsInEnglish() + nl
+                + "Duplicates: " + "\t" + getDuplicateJobs() + nl
+                + "Exceptions: " + "\t" + getExceptions() + nl;
+
+        return result;
     }
 
 }

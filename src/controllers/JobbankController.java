@@ -4,6 +4,7 @@ import model.Metrics;
 import crawlers.JobbankCrawler;
 import crawlerUtils.LangDetect;
 import com.cybozu.labs.langdetect.LangDetectException;
+import config.Config;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,10 +15,8 @@ import sharedUtilities.JobCategories;
 
 public class JobbankController {
 
-    //declare variables
+    private final String siteName;
     private LangDetect languageDetector;
-    private static final String profilesPath = "C:\\Users\\ksptsinplanet\\git\\crawler\\Crawler\\profiles";
-
     private final Metrics METRICS;
 
     Map<String, String> AC;
@@ -26,8 +25,8 @@ public class JobbankController {
 
     //constructor
     public JobbankController() {
-        METRICS = new Metrics("Jobbank");
-
+        siteName = "Jobbank";
+        METRICS = new Metrics(siteName);
         setUpLangDetector();
 
         AC = new HashMap<>();
@@ -117,9 +116,9 @@ public class JobbankController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawlerInstance = new JobbankCrawler(URL, d.division, JobCategories.ENGINEER, "Jobbank", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.ENGINEER, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
                     }
                 }
 
@@ -135,9 +134,9 @@ public class JobbankController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawlerInstance = new JobbankCrawler(URL, d.division, JobCategories.IT, "Jobbank", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.IT, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
                     }
                 }
 
@@ -145,9 +144,6 @@ public class JobbankController {
         } catch (IOException e1) {
             e1.printStackTrace(System.out);
         }
-
-
-
         //scan handel ######################################################################
         //#######nothing like this in this site
         //
@@ -161,9 +157,9 @@ public class JobbankController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawlerInstance = new JobbankCrawler(URL, d.division, JobCategories.BUSINESS, "Jobbank", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.BUSINESS, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
                     }
                 }
 
@@ -179,27 +175,26 @@ public class JobbankController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawlerInstance = new JobbankCrawler(URL, d.division, JobCategories.RES_EDU, "Jobbank", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
-                    }
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.RES_EDU, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);}
                 }
 
             }
         } catch (IOException e1) {
             e1.printStackTrace(System.out);
         }
-//
-//        //scan kontor ######################################################################businessAndOffice
+        
+        //scan kontor ######################################################################businessAndOffice
         try {
             String[] fields = {"Jura", "Administration"};
             for (AdmDivision d : allAdmDivisions) {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawlerInstance = new JobbankCrawler(URL, d.division, JobCategories.BUSINESS, "Jobbank", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.BUSINESS, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
                     }
                 }
 
@@ -215,9 +210,9 @@ public class JobbankController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawlerInstance = new JobbankCrawler(URL, d.division, JobCategories.MED_SOC, "Jobbank", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.MED_SOC, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
                     }
                 }
 
@@ -226,16 +221,16 @@ public class JobbankController {
             e1.printStackTrace(System.out);
         }
 
-                //scan ledelse ######################################################################
+        //scan ledelse ######################################################################
         try {
             String[] fields = {"Organisation & Ledelse", "Human Resources"};
             for (AdmDivision d : allAdmDivisions) {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawlerInstance = new JobbankCrawler(URL, d.division, JobCategories.LEADERSHIP, "Jobbank", languageDetector);
-                        Metrics m = crawlerInstance.scan();
-                        updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.LEADERSHIP, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
                     }
                 }
 
@@ -246,17 +241,9 @@ public class JobbankController {
         
         //scan oevrige ######################################################################
         //#######nothing like this in this site
-        System.out.println("METRICS:");
-        System.out.println("Jobs in site: " + "\t" + METRICS.getAllJobs());
-        System.out.println("Jobs in english: " + "\t" + METRICS.getJobsInEnglish());
-        System.out.println("Duplicates: " + "\t" + METRICS.getDuplicateJobs());
-        System.out.println("Exceptions: " + "\t" + METRICS.getExceptions());
-
-        //set metrics to return
-        METRICS.setAllJobs(METRICS.getAllJobs());
-        METRICS.setJobsInEnglish(METRICS.getJobsInEnglish());
-        METRICS.setDuplicateJobs(METRICS.getDuplicateJobs());
-        METRICS.setExceptions(METRICS.getExceptions());
+        
+        //metrics
+        System.out.println(METRICS.toString()); 
         return METRICS;
     }
 
@@ -264,21 +251,14 @@ public class JobbankController {
     private void setUpLangDetector() {
         languageDetector = new LangDetect();
         try {
+            String profilesPath = new Config().getProp("profiles_path");
             languageDetector.init(profilesPath);
         } catch (LangDetectException lde) {
             lde.printStackTrace(System.out);
         }
     }
 
-    private void updateMetrics(Metrics m, int allJobs, int jobsInEnglish, int duplicateJobs, int exceptions) {
-        m.setAllJobs(METRICS.getAllJobs() + allJobs);
-        m.setJobsInEnglish(METRICS.getJobsInEnglish() + jobsInEnglish);
-        m.setDuplicateJobs(METRICS.getDuplicateJobs() + duplicateJobs);
-        m.setExceptions(METRICS.getExceptions() + exceptions);
-    }
-
     class AdmDivision {
-
         //variables
         String division;
         List<String> subdivisions;

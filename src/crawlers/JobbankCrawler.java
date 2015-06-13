@@ -25,6 +25,7 @@ import model.Metrics;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.Company;
 import model.Job;
 import model.Field;
 
@@ -32,14 +33,7 @@ public class JobbankCrawler {
 
     // declare variables
     private static boolean danish = false;
-
-    //--- metrics
     private final Metrics METRICS;
-    int allJobs;
-    int jobsInEnglish;
-    int duplicateJobs;
-    int exceptions;
-    //----
 
     private String URL;
     private String area;
@@ -57,11 +51,6 @@ public class JobbankCrawler {
         this.foundAt = foundAt;
         this.languageDetector = languageDetector;
 
-        this.allJobs = 0;
-        this.jobsInEnglish = 0;
-        this.duplicateJobs = 0;
-        this.exceptions = 0;
-
         filter = new Filter();
         METRICS = new Metrics("JobbankPage");
         dbUtils = new DatabaseUtils();
@@ -74,65 +63,70 @@ public class JobbankCrawler {
     }
 
     public Metrics scan() {
+        
         // connect to URL
-        URL = URL.replaceAll("ø", "%C3%B8").replaceAll("å", "%C3%A5").replaceAll("æ", "%C3%A6");
-
+        URL = URL.replaceAll("ø", "%C3%B8")
+                .replaceAll("å", "%C3%A5")
+                .replaceAll("æ", "%C3%A6");
         Document doc = new Document("");
         try {
-            doc = Jsoup.connect(URL).timeout(20000).followRedirects(true).get();
-//            System.out.println("############### NEW CRAWLER");
-            System.out.println("############ Connected to: " + URL);
-//            System.out.println("");
+            doc = Jsoup.connect(URL)
+                    .timeout(20000)
+                    .followRedirects(true)
+                    .userAgent("Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36")
+                    .get();
+            // System.out.println("############ Connected to: " + URL);
         } catch (IOException e) {
             e.printStackTrace(System.out);
-            exceptions++;
+            METRICS.incrementExceptions();
             Logger.getLogger(JobindexCrawler.class.getName()).log(Level.SEVERE, null, e);
         }
 
         while (true) {
 
             try {
+                
                 // read page and return arrayList of paid Jobs
                 ArrayList<Job> paidJobs = scanDocForPaid(doc, area, foundAt);
+                
                 // save Jobs
-                duplicateJobs += dbUtils.deleteDuplicatesAndAddtoDB(paidJobs);
-//                dbUtils.addToDatabase();
+                int duplicateJobs = dbUtils.deleteDuplicatesAndAddtoDB(paidJobs);
+                METRICS.setDuplicateJobs(METRICS.getDuplicateJobs() + duplicateJobs);
             } catch (ParseException pe) {
-                exceptions++;
+                METRICS.incrementExceptions();
                 pe.printStackTrace(System.out);
             }
             // connect to next pages, if there are any
             try {
                 Element paginationSpan = doc.getElementsByClass("resultPageNumbers").first();
                 Elements paginationLinks = null;
-                try {// need a try here because there are some cat/places with no jobs, therefore no pagination
+                // need a try here because there are some cat/places with no jobs, therefore no pagination
+                try {
                     paginationLinks = paginationSpan.select("a[href]");
 
-                    if (paginationLinks.size() == 1) {// it is only this page
-//                        System.out.println("this is the last page");
+                    // If there is is only this page
+                    if (paginationLinks.size() == 1) {
                         break;
-                    } else {// we have other pages                   
+                    } else {                  
                         Element currentPage = paginationSpan.select("a.currentPage").first();
                         int index = paginationLinks.indexOf(currentPage);
-//                        System.out.println(paginationLinks.size() + " " + index);
                         if (paginationLinks.size() - 1 == index) {
-//                            System.out.println("this is the last page");
+                            
+                            // END
                             break;
                         } else {
-//                            System.out.println("next page is : " + index + 1);
                             URL = sanitizeUrl(paginationLinks.get(index + 1).attr("abs:href"));
-//                            System.out.println(URL);
                         }
 
                     }
                 } catch (Exception e) {
-                    exceptions++;
-//                    System.out.println("no links in this category, empty category");
+                    METRICS.incrementExceptions();
+                    // END
                     break;
                 }
 
             } catch (Exception e) {
-                exceptions++;
+                METRICS.incrementExceptions();
                 e.printStackTrace(System.out);
             }
             URL = URL.replaceAll("ø", "%C3%B8").replaceAll("å", "%C3%A5").replaceAll("æ", "%C3%A6");
@@ -140,26 +134,20 @@ public class JobbankCrawler {
                 doc = Jsoup.connect(URL).timeout(20000).followRedirects(true).get();
                 System.out.println("############ Connected to: " + URL);
             } catch (IOException e) {
-                exceptions++;
+                METRICS.incrementExceptions();
 //                e.printStackTrace(System.out);
                 Logger.getLogger(JobindexCrawler.class.getName()).log(Level.SEVERE, null, e);
             }
         }
-        //set metrics to return
-        METRICS.setAllJobs(allJobs);
-        METRICS.setJobsInEnglish(jobsInEnglish);
-        METRICS.setDuplicateJobs(duplicateJobs);
-        METRICS.setExceptions(exceptions);
         return METRICS;
     }
 
-    private ArrayList<Job> scanDocForPaid(Document doc, String city, String foundAt)
-            throws ParseException {
+    private ArrayList<Job> scanDocForPaid(Document doc, String city, String foundAt) throws ParseException {  
+        
         // get paid jobs table rows
         ArrayList<Job> jobs = new ArrayList<>();
-
         Elements JobDivs = doc.getElementsByClass("jobItem");
-        allJobs += JobDivs.size();
+        METRICS.setAllJobs(METRICS.getAllJobs() + JobDivs.size());
         // scan all jobs
         for (Element jobDiv : JobDivs) {
 
@@ -168,8 +156,14 @@ public class JobbankCrawler {
             String jobURL = firstLink.attr("abs:href");
 
             //get teaser text
-            String teaserText = jobDiv.select("div.longDescription").first().ownText();
-            //some ads dont have this, so set it to "";
+            String teaserText;
+            try {
+                teaserText = jobDiv.select("div.longDescription").first().ownText();
+            } catch (Exception e) {
+                teaserText = "empty text, i might be english, so check my internal page";
+            }
+            
+            //some longDescriptions are "";
             if (teaserText.equals("")) {
                 teaserText = "empty text, i might be english, so check my internal page";
             }
@@ -183,42 +177,44 @@ public class JobbankCrawler {
                     Document internalJobPage = null;
                     try {
 //                        System.out.println(jobURL);
-                        internalJobPage = Jsoup.connect(jobURL).timeout(20000).get();
+                        internalJobPage = Jsoup.connect(jobURL).
+                                timeout(20000)
+                                .userAgent("Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36")
+                                .get();
 
-                        String description = "";
+                        String jobText = "";
                         try {// some rare pages dont have any description tag. set them to danish true so as to skip them
-                            description = internalJobPage.select("div[itemprop = description]").first().text();
+                            jobText = internalJobPage.select("div[itemprop = description]").first().text();
                         } catch (Exception e) {
-                            exceptions++;
+                            METRICS.incrementExceptions();
 //                            System.out.println("No desprition tag in internal page, i set danish as true, so as to skip this shit");
                         }
                         // check if job description tag has content
-                        if (description.equals("")) {
+                        if (jobText.equals("")) {
 //                            System.out.println("No desprition in internal page, i set danish as true, so as to skip this shit");
                             danish = true;
                         } else {
                             //check if description is in english
                             try {
-                                if (languageDetector.detect(description).equalsIgnoreCase("en")) {
+                                if (languageDetector.detect(jobText).equalsIgnoreCase("en")) {
                                     danish = false;
                                 } else {
                                     danish = true;
                                 }
                             } catch (LangDetectException e) {
-                                exceptions++;
+                                METRICS.incrementExceptions();
 //                                e.printStackTrace(System.out);
                             }
                         }
                         // check if ad required danish even if its written in English
-                        if (filter.checkIfRequiresDanish(description)) {
+                        if (filter.checkIfRequiresDanish(jobText)) {
 //                            System.out.println("Danish requirement:" + internalJobPage.baseUri());
                             danish = true;
                         }
 
                         if (danish == false) {
 //                            System.out.println("LANGUAGE IS ENGLISH " + description);
-//                            System.out.println(" ");
-                            //all is ok so now we will overpass Jobband and take the real job URL.
+                            //all is ok so now we will overpass Jobbank and take the real job URL.
                             //the apply button has onclick="applyJob(555255, 'Akademikernes Jobbank') and this function does an ajax req.
                             //to this url:url: '/ajax.asp?act=job/ansoeg/'+stillingid. This returns data of this form:
                             //u$#$http://www.umu.se/umu/aktuellt/arkiv/lediga_tjanster/4-1114-14.html.
@@ -232,6 +228,7 @@ public class JobbankCrawler {
 //                            System.out.println(ajaxResponseBody);
                             if (token[0].equals("u")) {
                                 jobURL = token[1];
+                                
                                 //some urls are a prefetch url that redirects to the final url. Try to get it.
                                 if (jobURL.contains("prefetch")) {
                                     if (jobURL.contains("url=")) {
@@ -251,7 +248,7 @@ public class JobbankCrawler {
                                             System.out.println(jobURL);
                                         } catch (Exception ex) {
                                             ex.printStackTrace(System.out);
-                                            exceptions++;
+                                            METRICS.incrementExceptions();
                                         }
                                     }
 
@@ -259,7 +256,7 @@ public class JobbankCrawler {
                                         jobURL = sanitizeUrl(jobURL);
                                     } catch (Exception e) {
                                         e.printStackTrace(System.out);
-                                        exceptions++;
+                                        METRICS.incrementExceptions();
                                     }
 
                                 }
@@ -270,8 +267,7 @@ public class JobbankCrawler {
                             String jobTitle = firstLink.ownText();
 
                             //get company.
-                            String jobAnnouncer = internalJobPage.select("i.glyphicon-briefcase").first().parent().text();
-                            jobAnnouncer = jobAnnouncer.split(" hos ")[1];
+                            String jobAnnouncer = internalJobPage.select("i.glyphicon-home").first().parent().text();
 
                             //get publication date
                             Date jobDate;
@@ -279,49 +275,35 @@ public class JobbankCrawler {
                                 String datePublished = jobDiv.select("span.date").first().ownText();
                                 jobDate = new SimpleDateFormat("dd.MM.yyyy", new Locale("da", "DK")).parse(datePublished);
                             } catch (ParseException e) {
-                                exceptions++;
-                                jobDate = new Date();//TODO put last used date
-//                                System.out.println("HERETO");
+                                METRICS.incrementExceptions();
+                                
+                                //TODO put last used date
+                                jobDate = new Date();
                             }
                             System.out.println("________________________________________________" + "\r\n");
-//                            System.out.println("Job date: " + jobDate);
-//                            System.out.println("Job Title: " + jobTitle);
-//                            System.out.println("Job Announcer: " + jobAnnouncer);
-//                            System.out.println("Description: " + teaserText);
-//                            System.out.println("Ad url: " + jobURL);
-//                            System.out.println(" ");
 
-                            ArrayList fields = new ArrayList();
+                            // temporarily set text as "" so as not to overload DB
+                            jobText = "";
 
-                            jobTitle = filter.homogeniseJobTitle(jobTitle);
-                            jobAnnouncer = filter.homogeniseCompanyName(jobAnnouncer);
-                            jobURL = filter.homogeniseURL(jobURL);
-
-                            Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, description, 1, city, foundAt, fields);
-
+                            Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobText, 1, city, foundAt, new ArrayList());
                             Field f = new Field(jobCategory);
                             identifiedJob.addField(f);
-
-                            identifiedJob = filter.filterTitle(identifiedJob, jobCategory, jobTitle);
+                            identifiedJob = filter.filterTitleForPossibleChangeInFields(identifiedJob, jobCategory, jobTitle);
 
                             jobs.add(identifiedJob);
-                            jobsInEnglish++;
-
+                            METRICS.incrementJobsInEnglish();
                         }
 
                     } catch (IOException e) {
-                        exceptions++;
+                        METRICS.incrementExceptions();
                         e.printStackTrace(System.out);
                     }
                 } else {
                     danish = true;
-                    // Not english, not caring anymore for this adv.
                     // System.out.println("LANGUAGE NOT ENGLISH " + teaserText);
-                    // System.out.println(" ");
-
                 }
             } catch (LangDetectException e) {
-                exceptions++;
+                METRICS.incrementExceptions();
                 e.printStackTrace(System.out);
             }
         }
@@ -357,7 +339,7 @@ public class JobbankCrawler {
                 }
             });
         } catch (Exception e) {
-            exceptions++;
+            METRICS.incrementExceptions();
             // We can not recover from this exception.
             e.printStackTrace(System.out);
         }

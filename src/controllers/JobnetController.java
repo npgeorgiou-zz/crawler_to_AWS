@@ -3,18 +3,18 @@ package controllers;
 import model.Metrics;
 import crawlers.JobnetCrawler;
 import com.cybozu.labs.langdetect.LangDetectException;
+import config.Config;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import crawlerUtils.LangDetect;
 import sharedUtilities.JobCategories;
 
-class JobnetController {
+public class JobnetController {
 
     //declare variables
+    private final String siteName;
     private LangDetect languageDetector;
-    private static final String profilesPath = "C:\\Users\\ksptsinplanet\\git\\crawler\\Crawler\\profiles";
-
     private final Metrics METRICS;
 
     Map<String, String> AC;
@@ -23,7 +23,8 @@ class JobnetController {
 
     //constructor
     public JobnetController() {
-        METRICS = new Metrics("Jobnet");
+        siteName = "Jobnet";
+        METRICS = new Metrics(siteName);
 
         setUpLangDetector();
 
@@ -72,7 +73,7 @@ class JobnetController {
 //            for (String area : areas) {
 //                for (String field : fields) {
 //                    String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-//                    Crawler crawlerInstance = new Crawler(URL, field, area, "engineer");
+//                    Crawler crawler = new Crawler(URL, field, area, "engineer");
 //
 //                }
 //            }
@@ -88,9 +89,9 @@ class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawlerInstance = new JobnetCrawler(URL, area, JobCategories.IT, "Jobnet", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.IT, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -106,10 +107,9 @@ class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawlerInstance = new JobnetCrawler(URL, area, JobCategories.SERVICE, "Jobnet", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
-
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.SERVICE, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -126,10 +126,9 @@ class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawlerInstance = new JobnetCrawler(URL, area, JobCategories.SERVICE, "Jobnet", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
-
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.SERVICE, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -144,10 +143,9 @@ class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawlerInstance = new JobnetCrawler(URL, area, JobCategories.BUSINESS, "Jobnet", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
-
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.BUSINESS, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -162,10 +160,9 @@ class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawlerInstance = new JobnetCrawler(URL, area, JobCategories.RES_EDU, "Jobnet", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
-
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.RES_EDU, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -180,10 +177,9 @@ class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawlerInstance = new JobnetCrawler(URL, area, JobCategories.BUSINESS, "Jobnet", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
-
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.BUSINESS, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -198,10 +194,9 @@ class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawlerInstance = new JobnetCrawler(URL, area, JobCategories.MED_SOC, "Jobnet", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
-
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.MED_SOC, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -216,10 +211,9 @@ class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawlerInstance = new JobnetCrawler(URL, area, JobCategories.LEADERSHIP, "Jobnet", languageDetector);
-                    Metrics m = crawlerInstance.scan();
-                    updateMetrics(METRICS, m.getAllJobs(), m.getJobsInEnglish(), m.getDuplicateJobs(), m.getExceptions());
-
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.LEADERSHIP, siteName, languageDetector);
+                    Metrics m = crawler.scan();
+                    METRICS.updateMetrics(m);
                 }
             }
 
@@ -227,44 +221,20 @@ class JobnetController {
             e1.printStackTrace(System.out);
         }
 
-//        //scan oevrige ######################################################################
+        //scan oevrige ######################################################################
         //#######nothing like this in this site
-//        try {
-//            String fields[] = {"frivilligt", "kontorelev", "student", "studiepraktik", "oevrige", "elev", "kurseroevrige"};
-//            
-//            for (String field : fields) {
-//                for (String area : areas) {
-//                    Crawler crawlerInstance = new Crawler("http://www.jobindex.dk/job/oevrige", field, area, "studentAndInternshipAndOther");
-//                }
-//            }
-//        } catch (IOException e1) {
-//            e1.printStackTrace(System.out);
-//        }
-        System.out.println("METRICS:");
-        System.out.println("Jobs in site: " + "\t" + METRICS.getAllJobs());
-        System.out.println("Jobs in english: " + "\t" + METRICS.getJobsInEnglish());
-        System.out.println("Duplicates: " + "\t" + METRICS.getDuplicateJobs());
-        System.out.println("Exceptions: " + "\t" + METRICS.getExceptions());
 
-        //set metrics to return
-        METRICS.setAllJobs(METRICS.getAllJobs());
-        METRICS.setJobsInEnglish(METRICS.getJobsInEnglish());
-        METRICS.setDuplicateJobs(METRICS.getDuplicateJobs());
-        METRICS.setExceptions(METRICS.getExceptions());
+        
+        //metrics
+        System.out.println(METRICS.toString()); 
         return METRICS;
-    }
-
-    private void updateMetrics(Metrics m, int allJobs, int jobsInEnglish, int duplicateJobs, int exceptions) {
-        m.setAllJobs(METRICS.getAllJobs() + allJobs);
-        m.setJobsInEnglish(METRICS.getJobsInEnglish() + jobsInEnglish);
-        m.setDuplicateJobs(METRICS.getDuplicateJobs() + duplicateJobs);
-        m.setExceptions(METRICS.getExceptions() + exceptions);
     }
 
     //Initialize the language detector with the profiles
     private void setUpLangDetector() {
         languageDetector = new LangDetect();
         try {
+            String profilesPath = new Config().getProp("profiles_path");
             languageDetector.init(profilesPath);
         } catch (LangDetectException lde) {
             lde.printStackTrace(System.out);

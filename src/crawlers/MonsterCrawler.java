@@ -30,17 +30,10 @@ import model.Field;
 import model.Job;
 
 public class MonsterCrawler {
+
     // declare variables
-
     private boolean danish = false;
-
-    //--- metrics
     private final Metrics METRICS;
-    int allJobs;
-    int jobsInEnglish;
-    int duplicateJobs;
-    int exceptions;
-    //----
 
     private String URL;
     private String area;
@@ -58,11 +51,6 @@ public class MonsterCrawler {
         this.foundAt = foundAt;
         this.languageDetector = languageDetector;
 
-        this.allJobs = 0;
-        this.jobsInEnglish = 0;
-        this.duplicateJobs = 0;
-        this.exceptions = 0;
-
         filter = new Filter();
         METRICS = new Metrics("MonsterPage");
         dbUtils = new DatabaseUtils();
@@ -70,82 +58,79 @@ public class MonsterCrawler {
         try {
             setTrustAllCerts();
         } catch (Exception e) {
-            exceptions++;
+            METRICS.incrementExceptions();
             e.printStackTrace(System.out);
         }
 
     }
 
     public Metrics scan() {
-        // connect to URL
-        URL = URL.replaceAll("ø", "%C3%B8").replaceAll("å", "%C3%A5").replaceAll("æ", "%C3%A6")
-                .replaceAll("ä", "%C3%A4").replaceAll("ö", "%C3%B6");
+        // sanitize url
+        URL = URL.replaceAll("ø", "%C3%B8")
+                .replaceAll("å", "%C3%A5")
+                .replaceAll("æ", "%C3%A6")
+                .replaceAll("ä", "%C3%A4")
+                .replaceAll("ö", "%C3%B6");
         Document doc = new Document("");
         try {
             doc = Jsoup.connect(URL).timeout(200000).followRedirects(true).get();
-//            System.out.println("############### NEW CRAWLER");
-//            System.out.println("############ Connected to: " + URL);
+        // System.out.println("############ Connected to: " + URL);
         } catch (IOException e) {
             e.printStackTrace(System.out);
-            exceptions++;
+            METRICS.incrementExceptions();
             Logger.getLogger(JobindexCrawler.class.getName()).log(Level.SEVERE, null, e);
         }
         while (true) {
-
             try {
+
                 // read page and return arrayList of paid Jobs
                 ArrayList<Job> paidJobs = scanPage(doc, "odd", "even", area, foundAt);
+
                 // save Jobs
-                duplicateJobs += dbUtils.deleteDuplicatesAndAddtoDB(paidJobs);
-//                dbUtils.addToDatabase();
+                int duplicateJobs = dbUtils.deleteDuplicatesAndAddtoDB(paidJobs);
+                METRICS.setDuplicateJobs(METRICS.getDuplicateJobs() + duplicateJobs);
             } catch (ParseException pe) {
-                exceptions++;
+                METRICS.incrementExceptions();
                 pe.printStackTrace(System.out);
             }
             // connect to next pages, if there are any
             try {
                 Element paginationDiv = doc.getElementsByClass("navigationBar").first();
-                if (paginationDiv != null) {// if there is pagination, therefore if there are other pages
-//                    System.out.println("there is pagination");
 
+                // if there is pagination, therefore if there are other pages
+                if (paginationDiv != null) {
                     Element aWithClassLast = paginationDiv.getElementsByClass("last").first();
-                    if (aWithClassLast == null) {//this isnt the last page
-//                        System.out.println("this isnt the last page");
-//                        System.out.println(">> " + URL);
+                    if (aWithClassLast == null) {
+                        //this isnt the last page
+                        // System.out.println("this isnt the last page");
                         URL = paginationDiv.select("a").last().attr("abs:href");
-//                        System.out.println(">> " + URL);
-//                        System.out.println(URL);
                     } else {
-//                        System.out.println("this is the last page");
+                        // END
                         break;
                     }
 
                 } else {
+                    // END
                     break;
                 }
 
             } catch (Exception e) {
-                exceptions++;
+                METRICS.incrementExceptions();
                 e.printStackTrace(System.out);
             }
-            URL = URL.replaceAll("ø", "%C3%B8").replaceAll("å", "%C3%A5").replaceAll("æ", "%C3%A6")
-                    .replaceAll("ä", "%C3%A4").replaceAll("ö", "%C3%B6");
+            URL = URL.replaceAll("ø", "%C3%B8")
+                    .replaceAll("å", "%C3%A5")
+                    .replaceAll("æ", "%C3%A6")
+                    .replaceAll("ä", "%C3%A4")
+                    .replaceAll("ö", "%C3%B6");
             try {
-
                 doc = Jsoup.connect(URL).timeout(200000).followRedirects(true).get();
-//                System.out.println("############ changed page in pagination");
-//                System.out.println("############ Connected to: " + URL);
             } catch (IOException e) {
-                exceptions++;
+                METRICS.incrementExceptions();
                 e.printStackTrace(System.out);
                 Logger.getLogger(JobindexCrawler.class.getName()).log(Level.SEVERE, null, e);
             }
         }
-        //set metrics to return
-        METRICS.setAllJobs(allJobs);
-        METRICS.setJobsInEnglish(jobsInEnglish);
-        METRICS.setDuplicateJobs(duplicateJobs);
-        METRICS.setExceptions(exceptions);
         return METRICS;
     }
 
@@ -158,76 +143,102 @@ public class MonsterCrawler {
         Elements allRows = new Elements();
         allRows.addAll(paidJobTableRowsOdd);
         allRows.addAll(paidJobTableRowsEven);
-        allJobs += allRows.size();
+        METRICS.setAllJobs(METRICS.getAllJobs() + allRows.size());
 
         // scan all rows
         for (Element paidJobRow : allRows) {
+            
             // get ad link url
-            Element firstLink = paidJobRow.select("a[href]").first();
-            String jobURL = null;
-            jobURL = firstLink.attr("abs:href");
+            String jobURL = paidJobRow.select("a[href]").first().attr("abs:href");
 
             // Open connection to joblink
             Document internalDocument = null;
             try {
-//                System.out.println(jobURL);
                 internalDocument = Jsoup.connect(jobURL).timeout(20000).get();
                 Element internalDocumentBody = internalDocument.select("body").first();
-
                 try {
-                    if (!internalDocumentBody.text().trim().isEmpty()) { // if page has text content
+                    
+                    // if page has text content
+                    if (!internalDocumentBody.text().trim().isEmpty()) {
+                        
                         //take main div that holds ad text
                         Element mainDiv = internalDocumentBody.select("div[itemprop = description]").first();
-                        if (mainDiv == null) {//if this page format doesnt exist, then maindiv is <div id="jobBodyContent">
+                        
+                        //if this page format doesnt exist, then maindiv is <div id="jobBodyContent">
+                        if (mainDiv == null) {
                             mainDiv = internalDocumentBody.select("div[id = jobBodyContent]").first();
                         }
-                        if (mainDiv == null) {//if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+                        
+                        //if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+                        if (mainDiv == null) {
                             mainDiv = internalDocumentBody.select("div[id = CJT-jobBodyContent]").first();
                         }
-                        if (mainDiv == null) {//if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+                        
+                        //if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+                        if (mainDiv == null) {
                             mainDiv = internalDocumentBody.select("div[id = CJT-jobdesc]").first();
                         }
-                        if (mainDiv == null) {//if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+                        
+                        //if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+                        if (mainDiv == null) {
                             mainDiv = internalDocumentBody.select("div[id = contentleft]").first();
                         }
-                        if (mainDiv == null) {//if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+                        
+                        //if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+                        if (mainDiv == null) {
                             mainDiv = internalDocumentBody.select("div[id = left_wrapper]").first();
                         }
-                        if (mainDiv == null) {//if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+                        
+                        //if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+                        if (mainDiv == null) {
                             mainDiv = internalDocumentBody.select("div[id = left_column]").first();
                         }
-                        if (mainDiv == null) {//if this page format doesnt exist, then maindiv is <div id="TrackingJobBody">
+                        
+                        //if this page format doesnt exist, then maindiv is <div id="TrackingJobBody">
+                        if (mainDiv == null) {
                             mainDiv = internalDocumentBody.select("span[id = TrackingJobBody]").first();
                         }
-                        if (mainDiv == null) {//if this page format doesnt exist, then maindiv is <div id="mycontent">
+                        
+                        //if this page format doesnt exist, then maindiv is <div id="mycontent">
+                        if (mainDiv == null) {
                             mainDiv = internalDocumentBody.select("div[id = textWrap]").first();
                         }
-                        if (mainDiv == null) {//if this page format doesnt exist, then maindiv is <div id="mycontent">
+                        
+                        //if this page format doesnt exist, then maindiv is <div id="mycontent">
+                        if (mainDiv == null) {
                             mainDiv = internalDocumentBody.select("div[id = mycontent]").first();
                         }
-                        if (mainDiv == null) {//if this page format doesnt exist, then maindiv is <div class = "jDespHolder">
+                        
+                        //if this page format doesnt exist, then maindiv is <div class = "jDespHolder">
+                        if (mainDiv == null) {
                             mainDiv = internalDocumentBody.select("div[id = jobdesc]").first();
                         }
-                        if (mainDiv == null) {//if this page format doesnt exist, then maindiv is <div class = "jDespHolder">
+                        
+                        //if this page format doesnt exist, then maindiv is <div class = "jDespHolder">
+                        if (mainDiv == null) {
                             mainDiv = internalDocumentBody.select("div[class = main]").first();
                         }
-                        if (mainDiv == null) {//if this page format doesnt exist, then maindiv is <span itemprop="description">
+                        
+                        //if this page format doesnt exist, then maindiv is <span itemprop="description">
+                        if (mainDiv == null) {
                             mainDiv = internalDocumentBody.select("span[itemprop = description]").first();
                         }
-                        if (mainDiv == null) {//if this page format doesnt exist, set whole doc
+                        
+                        //if this page format doesnt exist, set whole doc
+                        if (mainDiv == null) {
                             mainDiv = internalDocumentBody;
                         }
-                        String mainText = mainDiv.text();
+                        
                         // if the text of the mainDiv is nothing, put whole document text as text
-                        if (mainText.equals("")) {//if this page format doesnt exist, set whole doc
+                        String mainText = mainDiv.text();
+                        
+                        //if this page format doesnt exist, set whole doc
+                        if (mainText.equals("")) {
                             mainText = internalDocumentBody.text();
                         }
 
-                        if (languageDetector.detect(mainText).equalsIgnoreCase("en")) {// and if is english
-                            danish = false;
-                        } else {
-                            danish = true;
-                        }
+                        // check for english
+                        danish = !languageDetector.detect(mainText).equalsIgnoreCase("en");
 
                         // check if ad required danish even if its written in English
                         if (filter.checkIfRequiresDanish(mainText)) {
@@ -236,19 +247,17 @@ public class MonsterCrawler {
                         }
 
                         if (danish == false) {
+                            
                             // job is what we are looking for
-//                            System.out.println("LANGUAGE IS ENGLISH " + mainText);
-//                            System.out.println(" ");
-
                             // now we try to bypass monster internal pages, if we can
                             String realURL = "";
                             Elements scriptElement = internalDocument.getElementsByTag("script");
                             for (Element s : scriptElement) {
                                 if (s.html().contains("ApplyOnlineUrl: ")) {
-                                    realURL = s.html().split("ApplyOnlineUrl: '")[1];
-                                    realURL = realURL.split("',")[0];
-
-                                    if (!(realURL.contains("mit.monster.dk") || realURL.contains("mitt.monster.se")) && realURL.length() != 0) {//if realURL is not an internal monster url, or is not like : ApplyOnlineUrl: ''                                      
+                                    realURL = s.html().split("ApplyOnlineUrl: '")[1].split("',")[0];
+                                    
+                                    //if realURL is not an internal monster url, or is not like : ApplyOnlineUrl: ''
+                                    if (!(realURL.contains("mit.monster.dk") || realURL.contains("mitt.monster.se")) && realURL.length() != 0) {                                      
                                         jobURL = realURL;
                                     }
                                 }
@@ -257,58 +266,49 @@ public class MonsterCrawler {
                             // get info that we need
                             //get job title
                             String jobTitle = paidJobRow.select("div[class = jobTitleContainer]").text();
+                            
                             //get company
-                            //String jobAnnouncer = paidJobRow.select("div[class = companyContainer]").text().replace("Virksomhed: ", "");
                             String jobAnnouncer = paidJobRow.select("div[class = companyContainer]").select("a[href]").attr("title");
+                            
                             //get publication date
-                            String daysPublished = paidJobRow.select("div[class = fnt20]").text().replace("Publiceret: ", "").replace(" dage siden", "").replace("Publicerad: ", "").replace(" dagar sedan", "");
+                            String daysPublished = paidJobRow.select("div[class = fnt20]").text()
+                                    .replace("Publiceret: ", "")
+                                    .replace(" dage siden", "")
+                                    .replace("Publicerad: ", "")
+                                    .replace(" dagar sedan", "");
+                            
                             Calendar cal = Calendar.getInstance();
                             Date jobDate;
-                            int daysPublishedAsInt;
                             if (daysPublished.equals("I dag")) {
                                 jobDate = cal.getTime();
                             } else {
-                                daysPublishedAsInt = Integer.parseInt(daysPublished);
+                                int daysPublishedAsInt = Integer.parseInt(daysPublished);
                                 cal.add(Calendar.DATE, -daysPublishedAsInt);
                                 jobDate = cal.getTime();
                             }
                             System.out.println("________________________________________________" + "\r\n");
-                            //sout info and add it to arrayList
-                            //System.out.println("job date: " + jobDate);
-                            //System.out.println("Job Title: " + jobTitle);
-                            //System.out.println("Job Announcer: " + jobAnnouncer);
-                            //System.out.println("Small text: " + mainText);
-                            //System.out.println("Ad url: " + jobURL);
-                            //System.out.println(" ");
 
-                            ArrayList fields = new ArrayList();
+                            // temporarily set text as "" so as not to overload DB
+                            mainText = "";
 
-                            jobTitle = filter.homogeniseJobTitle(jobTitle);
-                            jobAnnouncer = filter.homogeniseCompanyName(jobAnnouncer);
-                            jobURL = filter.homogeniseURL(jobURL);
-
-                            Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, mainText, 1, city, foundAt, fields);
-
+                            Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, mainText, 1, city, foundAt, new ArrayList());
                             Field f = new Field(jobCategory);
-                            identifiedJob.addField(f);
-                            identifiedJob = filter.filterTitle(identifiedJob, jobCategory, jobTitle);
+                            identifiedJob.addField(f);  
+                            identifiedJob = filter.filterTitleForPossibleChangeInFields(identifiedJob, jobCategory, jobTitle);
 
                             jobs.add(identifiedJob);
-                            jobsInEnglish++;
-
+                            METRICS.incrementJobsInEnglish();
                         } else {
 //                            System.out.println("LANGUAGE NOT ENGLISH " + mainText);
-//                            System.out.println(" ");
                         }
-
                     }
                 } catch (LangDetectException e) {
-                    exceptions++;
+                    METRICS.incrementExceptions();
                     e.printStackTrace(System.out);
                 }
 
             } catch (IOException e) {
-                exceptions++;
+                METRICS.incrementExceptions();
                 e.printStackTrace(System.out);
             }
         }
@@ -339,7 +339,7 @@ public class MonsterCrawler {
                 }
             });
         } catch (Exception e) {
-            exceptions++;
+            METRICS.incrementExceptions();
             e.printStackTrace(System.out);
         }
     }
