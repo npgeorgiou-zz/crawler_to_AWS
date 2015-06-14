@@ -1,65 +1,30 @@
 package crawlers;
 
-import crawlerUtils.Filter;
 import java.io.IOException;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import dbUtils.DatabaseUtils;
 import crawlerUtils.LangDetect;
-import com.cybozu.labs.langdetect.LangDetectException;
 import model.Metrics;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.Company;
 import model.Job;
 import model.Field;
 
-public class JobbankCrawler {
+public class JobbankCrawler extends BaseCrawler{
 
     // declare variables
-    private static boolean danish = false;
-    private final Metrics METRICS;
 
-    private String URL;
-    private String area;
-    private String jobCategory;
-    private String foundAt;
-    private LangDetect languageDetector;
-    private Filter filter;
-    private DatabaseUtils dbUtils;
     // constructor
-
     public JobbankCrawler(String URL, String area, String jobCategory, String foundAt, LangDetect languageDetector) throws IOException {
-        this.URL = URL;
-        this.area = area;
-        this.jobCategory = jobCategory;
-        this.foundAt = foundAt;
-        this.languageDetector = languageDetector;
-
-        filter = new Filter();
-        METRICS = new Metrics("JobbankPage");
-        dbUtils = new DatabaseUtils();
-
-        try {
-            setTrustAllCerts();
-        } catch (Exception e) {
-            e.printStackTrace(System.out);
-        }
+        super(URL, area, jobCategory, foundAt, languageDetector);
     }
 
     public Metrics scan() {
@@ -322,56 +287,8 @@ public class JobbankCrawler {
         return doc;
     }
 
-    private boolean isEnglish(String text) {
-        boolean english = false;
-        try {
-            english = languageDetector.detect(text).equalsIgnoreCase("en");
-        } catch (LangDetectException e) {
-            METRICS.incrementExceptions();
-            // e.printStackTrace(System.out);
-        }
-
-        return english;
-    }
-    
-    /**
-     * Allow https connection
-     *
-     * @throws Exception
-     */
-    private void setTrustAllCerts() throws Exception {
-        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
-
-            public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-            }
-
-            public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-            }
-        }};
-
-        // Install the all-trusting trust manager
-        try {
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-            HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-                public boolean verify(String urlHostName, SSLSession session) {
-                    return true;
-                }
-            });
-        } catch (Exception e) {
-            METRICS.incrementExceptions();
-            // We can not recover from this exception.
-            e.printStackTrace(System.out);
-        }
-    }
-
-    static private String sanitizeUrl(String msg) throws UnsupportedEncodingException {
-        String decoded = java.net.URLDecoder.decode(msg, "UTF-8");
-        decoded = decoded.replaceAll("\\$x\\$", "&");
-        return decoded;
+    // adds some replace functionality to the parent method
+    protected String sanitizeUrl(String msg) throws UnsupportedEncodingException {
+        return super.sanitizeUrl(msg).replaceAll("\\$x\\$", "&");
     }
 }

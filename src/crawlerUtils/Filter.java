@@ -6,7 +6,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import model.Field;
 import model.Job;
-import sharedUtilities.JobCategories;
 
 public class Filter {
 
@@ -49,9 +48,11 @@ public class Filter {
     }
 
     public String homogeniseCompanyName(String cn) {
+        
         //remove weird gap char
         cn = cn.replaceAll("\\u0096", "")
                 .replaceAll("\\u00a0", "");
+        
         //.dk, .com
         cn = cn.replaceAll("\\.dk", "");
         cn = cn.replaceAll("\\.com", "");
@@ -121,12 +122,15 @@ public class Filter {
         if (cn.equalsIgnoreCase("RUC")) {
             cn = "University of Roskilde";
         }
+        
         //remove generic unnecessary bits like A/S, aps etch
         StringTokenizer regex = new StringTokenizer(config.getProp("company_name_dirts"), ",");
         String data = "";
+        
         while (regex.hasMoreElements()) {
             data = data + "(\\b" + regex.nextToken().replaceAll("^\\s", "") + "\\b)|";
         }
+        
         String PatternAsTokens = data.substring(0, data.length() - 1);
         Pattern myPattern = Pattern.compile(PatternAsTokens, Pattern.CASE_INSENSITIVE);
 
@@ -143,8 +147,10 @@ public class Filter {
 
         //filter whitespaces that are more than one
         cn = cn.replaceAll(" +", " ");
+        
         //remove spaces from beginning and end of string
         cn = cn.trim();
+        
         //now from the clean name, replace some companies that tend to have 2 or more different names, with a standard
         cn = replaceStrings(cn);
 
@@ -174,7 +180,6 @@ public class Filter {
                 cn = cn.concat("-").concat(w);
             }
             cn = cn.substring(1);
-
         }
 
         return cn;
@@ -287,18 +292,23 @@ public class Filter {
     }
 
     public String homogeniseJobTitle(String jt) {
+        
         //remove weird gap char
         jt = jt.replaceAll("\\u0096", "")
                 .replaceAll("\\u00a0", "");
+        
         //remove commas and dots from end
         jt = jt.replaceAll("[,.:]+$", "");
+        
         //replace ! with .
         jt = jt.replaceAll("!", "");
+        
         //remove numbers that are more than 2 and are in beginning of String
         if (jt.length() != 0) {
             if (Character.isDigit(jt.charAt(0)) && Character.isDigit(jt.charAt(1)) && Character.isDigit(jt.charAt(2))) {
                 jt = jt.replaceFirst("^[0-9]+(?!$)", "");
                 jt = jt.trim();
+                
                 //remove commas, dots, -s from beginning
                 jt = jt.replaceFirst("^[,.:-]+(?!$)", "");
             }
@@ -347,6 +357,7 @@ public class Filter {
 
         //filter before and after whitespaces
         jt = jt.trim();
+        
         //capitalise first letter
         if (jt.length() != 0) {
             jt = jt.substring(0, 1).toUpperCase() + jt.substring(1);
@@ -356,16 +367,16 @@ public class Filter {
     }
 
     public String homogeniseURL(String url) {
-        //    http://www.milestonesys.com/Company/Milestone-Systems/jobsandcareers/Job-Details/?jobId=443#jobbank.dk
+        // http://www.milestonesys.com/Company/Milestone-Systems/jobsandcareers/Job-Details/?jobId=443#jobbank.dk
         if (url.contains("www.milestonesys.com")) {
             url = url.replaceAll("#jobbank.dk", "");
         }
-        //    http://www.danskebank.com/da-dk/karriere/soeg-job/Pages/JobShow.aspx?JobPostingId=7066&Dis=        
+        // http://www.danskebank.com/da-dk/karriere/soeg-job/Pages/JobShow.aspx?JobPostingId=7066&Dis=        
         if (url.contains("www.danskebank.com")) {
             url = url.replaceAll("&Dis=", "");
         }
-        //    https://jobsearch.maersk.com/vacancies/publication?pinst=005056A52F591EE4A59878C61A774DD1&CallBackUrl=http://www.maersk.com/system/sapcallbackurl&userid=
-        //    https://jobsearch.maersk.com/vacancies/publication?PINST=005056A52F591EE4A59878C61A774DD1&APPLY=X
+        // https://jobsearch.maersk.com/vacancies/publication?pinst=005056A52F591EE4A59878C61A774DD1&CallBackUrl=http://www.maersk.com/system/sapcallbackurl&userid=
+        // https://jobsearch.maersk.com/vacancies/publication?PINST=005056A52F591EE4A59878C61A774DD1&APPLY=X
         if (url.contains("jobsearch.maersk.com")) {
             try {
                 String divider = "pinst=";
@@ -393,7 +404,6 @@ public class Filter {
                     fieldChanged = true;
                     break;
                 }
-                break;
             case STUDENT:
                 if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {//if title contains researchAndEdu words
                     System.out.println(jobCategory.toUpperCase() + " ---> "
@@ -402,9 +412,7 @@ public class Filter {
                     fieldChanged = true;
                     break;
                 }
-                break;
             case LEADERSHIP:
-
                 if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {//if title contains researchAndEdu words
                     System.out.println(jobCategory.toUpperCase() + " ---> "
                             + RES_EDU + " # " + "\t" + jobTitle + "\r\n");
@@ -456,11 +464,7 @@ public class Filter {
                     changeJobField(JobBeingFiletered, jobCategory, SERVICE, "ADD");
                     fieldChanged = true;
                 }
-
-                break;
-
             case IT:
-
                 if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {//if title contains researchAndEdu words
                     System.out.println(jobCategory.toUpperCase() + " ---> "
                             + RES_EDU + " # " + "\t" + jobTitle + "\r\n");
@@ -521,10 +525,7 @@ public class Filter {
                     fieldChanged = false;
                 }
 
-                break;
-
             case BUSINESS_OFFICE:
-
                 if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {//if title contains researchAndEdu words
                     System.out.println(jobCategory.toUpperCase() + " ---> "
                             + RES_EDU + " # " + "\t" + jobTitle + "\r\n");
@@ -575,7 +576,6 @@ public class Filter {
                     changeJobField(JobBeingFiletered, jobCategory, SERVICE, "MOVE");
                     fieldChanged = true;
                 }
-                break;
             default:
                 if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {//if title contains researchAndEdu words
                     System.out.println(jobCategory.toUpperCase() + " ---> "

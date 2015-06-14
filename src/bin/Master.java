@@ -31,10 +31,9 @@ public class Master {
     private static void scan() {
 
         // Empty DB
-//        dbUtils.flushDatabase();
-       
-                //Jobnet
-        Metrics jnm = new JobnetController().start();
+        dbUtils.flushDatabase();
+         
+               Metrics jnm = new JobnetController().start();
         finalM.updateMetrics(jnm);
         
         //Jobbank
@@ -49,7 +48,8 @@ public class Master {
         Metrics jim = new JobindexController().start();
         finalM.updateMetrics(jim);
 
-
+        //Jobnet
+ 
 
         //Jobbsafari
         Metrics jsm = new JobbsafariController().start();

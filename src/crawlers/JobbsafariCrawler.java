@@ -1,10 +1,7 @@
 package crawlers;
 
-import crawlerUtils.Filter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,61 +9,24 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import dbUtils.DatabaseUtils;
 import crawlerUtils.LangDetect;
 import com.cybozu.labs.langdetect.LangDetectException;
 import model.Metrics;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.net.ssl.SSLSocketFactory;
-import model.Company;
 import model.Job;
 import model.Field;
 
-public class JobbsafariCrawler {
+public class JobbsafariCrawler extends BaseCrawler{
 
     // declare variables
-    private boolean danish = false;
-    private final Metrics METRICS;
-
-    private String URL;
-    private String area;
-    private String jobCategory;
-    private String foundAt;
-    private LangDetect languageDetector;
-    private Filter filter;
-    private DatabaseUtils dbUtils;
 
     public JobbsafariCrawler(String URL, String area, String jobCategory, String foundAt, LangDetect languageDetector) throws IOException {
-        this.URL = URL;
-        this.area = area;
-        this.jobCategory = jobCategory;
-        this.foundAt = foundAt;
-        this.languageDetector = languageDetector;
-
-        filter = new Filter();
-        METRICS = new Metrics("JobbsafariPage");
-        dbUtils = new DatabaseUtils();
-
-        try {
-            setTrustAllCerts();
-        } catch (Exception e) {
-            METRICS.incrementExceptions();
-            e.printStackTrace(System.out);
-        }
-
+        super(URL, area, jobCategory, foundAt, languageDetector);
     }
 
     public Metrics scan() {
@@ -516,66 +476,6 @@ public class JobbsafariCrawler {
     }
 
     /**
-     * Decodes url (Removes %3f etc)
-     *
-     * @param msg url to decode
-     * @return decoded url
-     * @throws UnsupportedEncodingException
-     */
-    private String sanitizeUrl(String msg) throws UnsupportedEncodingException {
-        String decoded = java.net.URLDecoder.decode(msg, "UTF-8");
-        return decoded;
-    }
-
-    /**
-     * Allow https connection
-     *
-     * @throws Exception
-     */
-    private void setTrustAllCerts() throws Exception {
-        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
-
-            public void checkClientTrusted(
-                    java.security.cert.X509Certificate[] certs, String authType) {
-            }
-
-            public void checkServerTrusted(
-                    java.security.cert.X509Certificate[] certs, String authType) {
-            }
-        }
-        };
-
-        try {
-            SSLContext sslContext = null;
-            try {
-                sslContext = SSLContext.getInstance("SSLv3");
-
-            } catch (NoSuchAlgorithmException e) {
-                METRICS.incrementExceptions();
-                e.printStackTrace(System.out);
-            }
-
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            SSLSocketFactory factory = sslContext.getSocketFactory();
-            HttpsURLConnection.setDefaultSSLSocketFactory(factory);
-        } catch (KeyManagementException e) {
-            METRICS.incrementExceptions();
-            e.printStackTrace(System.out);
-        }
-        // Create all-trusting host name verifier
-        HostnameVerifier allHostsValid = new HostnameVerifier() {
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        };
-        // Install the all-trusting host verifier
-        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-    }
-
-    /**
      * String to date formatter : d MMMM yyyy with locale DA
      *
      * @param mystr the string to format into date
@@ -592,5 +492,4 @@ public class JobbsafariCrawler {
         }
 
     }
-
 }

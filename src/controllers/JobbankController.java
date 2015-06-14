@@ -6,7 +6,6 @@ import crawlerUtils.LangDetect;
 import com.cybozu.labs.langdetect.LangDetectException;
 import config.Config;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
