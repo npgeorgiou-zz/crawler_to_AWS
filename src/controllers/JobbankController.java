@@ -6,12 +6,12 @@ import crawlerUtils.LangDetect;
 import com.cybozu.labs.langdetect.LangDetectException;
 import config.Config;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import sharedUtilities.JobCategories;
 
 public class JobbankController {
 
@@ -23,12 +23,184 @@ public class JobbankController {
     Map<String, String> FC;
     List<AdmDivision> allAdmDivisions;
 
+    // Get categories names from Config file
+    Config c = new Config();
+    private final String ENGINEER = c.getProp("engineer_dbname");
+    private final String IT = c.getProp("it_dbname");
+    private final String BUSINESS_OFFICE = c.getProp("business_dbname");
+    private final String MARKETING = c.getProp("marketing_dbname");
+    private final String LEADERSHIP = c.getProp("leadership_dbname");
+    private final String SERVICE = c.getProp("service_dbname");
+    private final String INDUSTRY = c.getProp("industry_dbname");
+    private final String RES_EDU = c.getProp("res_edu_dbname");
+    private final String MED_SOC = c.getProp("med_soc_dbname");
+    private final String STUDENT = c.getProp("student_dbname");
+
     //constructor
     public JobbankController() {
         siteName = "Jobbank";
         METRICS = new Metrics(siteName);
+        
         setUpLangDetector();
+        setUpAreaCodes();
+        setUpFieldCodes();
+        setUpAdministrativeDivisions();
+    }
 
+    //methods
+    public Metrics start(){
+        //scan engineer ######################################################################
+        try {
+            String[] fields = {"Anlæg, Byggeri & Konstruktion", "Arkitektur, Kunst & Design", "Elektro & Telekommunikation",
+                "Fødevarer & Veterinær", "Kemi, Biotek & Materialer", "Klima, Miljø & Energi", "Landbrug & Natur", "Maskin & Design",
+                "Matematik, Fysik & Nano"};
+            for (AdmDivision d : allAdmDivisions) {
+                for (String subd : d.subdivisions) {
+                    for (String field : fields) {
+                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, ENGINEER, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
+                    }
+                }
+
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+        }
+
+        //scan it ######################################################################
+        try {
+            String[] fields = {"IT"};
+            for (AdmDivision d : allAdmDivisions) {
+                for (String subd : d.subdivisions) {
+                    for (String field : fields) {
+                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, IT, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
+                    }
+                }
+
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+        }
+        //scan handel ######################################################################
+        //#######nothing like this in this site
+        //
+        //scan industri ######################################################################
+        //#######nothing like this in this site
+        //
+        //scan salg ######################################################################
+        try {
+            String[] fields = {"Marketing & Business"};
+            for (AdmDivision d : allAdmDivisions) {
+                for (String subd : d.subdivisions) {
+                    for (String field : fields) {
+                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, BUSINESS_OFFICE, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
+                    }
+                }
+
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+        }
+
+        //scan undervisning ######################################################################
+        try {
+            String[] fields = {"Undervisning & Pædagogik"};
+            for (AdmDivision d : allAdmDivisions) {
+                for (String subd : d.subdivisions) {
+                    for (String field : fields) {
+                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, RES_EDU, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
+                    }
+                }
+
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+        }
+
+        //scan kontor ######################################################################businessAndOffice
+        try {
+            String[] fields = {"Jura", "Administration"};
+            for (AdmDivision d : allAdmDivisions) {
+                for (String subd : d.subdivisions) {
+                    for (String field : fields) {
+                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, BUSINESS_OFFICE, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
+                    }
+                }
+
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+        }
+
+        //scan social ######################################################################
+        try {
+            String[] fields = {"Medicinal & Sundhed"};
+            for (AdmDivision d : allAdmDivisions) {
+                for (String subd : d.subdivisions) {
+                    for (String field : fields) {
+                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, MED_SOC, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
+                    }
+                }
+
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+        }
+
+        //scan ledelse ######################################################################
+        try {
+            String[] fields = {"Organisation & Ledelse", "Human Resources"};
+            for (AdmDivision d : allAdmDivisions) {
+                for (String subd : d.subdivisions) {
+                    for (String field : fields) {
+                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, LEADERSHIP, siteName, languageDetector);
+                        Metrics m = crawler.scan();
+                        METRICS.updateMetrics(m);
+                    }
+                }
+
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace(System.out);
+        }
+
+        //scan oevrige ######################################################################
+        //#######nothing like this in this site
+        //metrics
+        System.out.println(METRICS.toString());
+        return METRICS;
+    }
+
+    //Initialize the language detector with the profiles
+    private void setUpLangDetector() {
+        languageDetector = new LangDetect();
+        try {
+            String profilesPath = new Config().getProp("profiles_path");
+            languageDetector.init(profilesPath);
+        } catch (LangDetectException lde) {
+            lde.printStackTrace(System.out);
+        }
+    }
+
+    private void setUpAreaCodes() {
         AC = new HashMap<>();
         AC.put("Storkøbenhavn", "2");
         AC.put("Frederiksborg området", "3");
@@ -46,6 +218,9 @@ public class JobbankController {
         AC.put("Bornholm", "20");
         AC.put("Øresundregionen", "21");
         AC.put("Grønland & Færøerne", "22");
+    }
+
+    private void setUpFieldCodes() {
 
         FC = new HashMap<>();
         FC.put("Administration", "20");
@@ -72,7 +247,9 @@ public class JobbankController {
         FC.put("Teknik & Teknologi", "33");
         FC.put("Undervisning & Pædagogik", "26");
         FC.put("Økonomi & Revision", "21");
+    }
 
+    private void setUpAdministrativeDivisions() {
         List<String> copenhagen = Arrays.asList("Storkøbenhavn", "Frederiksborg området");
         AdmDivision Copenhagen = new AdmDivision("Copenhagen", copenhagen);
 
@@ -102,163 +279,10 @@ public class JobbankController {
         allAdmDivisions.add(Syddanmark);
         allAdmDivisions.add(GroenlandAndFaroe);
         allAdmDivisions.add(Øresund);
-
-    }
-
-    //methods
-    public Metrics start() {
-        //scan engineer ######################################################################
-        try {
-            String[] fields = {"Anlæg, Byggeri & Konstruktion", "Arkitektur, Kunst & Design", "Elektro & Telekommunikation",
-                "Fødevarer & Veterinær", "Kemi, Biotek & Materialer", "Klima, Miljø & Energi", "Landbrug & Natur", "Maskin & Design",
-                "Matematik, Fysik & Nano"};
-            for (AdmDivision d : allAdmDivisions) {
-                for (String subd : d.subdivisions) {
-                    for (String field : fields) {
-                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.ENGINEER, siteName, languageDetector);
-                        Metrics m = crawler.scan();
-                        METRICS.updateMetrics(m);
-                    }
-                }
-
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace(System.out);
-        }
-
-        //scan it ######################################################################
-        try {
-            String[] fields = {"IT"};
-            for (AdmDivision d : allAdmDivisions) {
-                for (String subd : d.subdivisions) {
-                    for (String field : fields) {
-                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.IT, siteName, languageDetector);
-                        Metrics m = crawler.scan();
-                        METRICS.updateMetrics(m);
-                    }
-                }
-
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace(System.out);
-        }
-        //scan handel ######################################################################
-        //#######nothing like this in this site
-        //
-        //scan industri ######################################################################
-        //#######nothing like this in this site
-        //
-        //scan salg ######################################################################
-        try {
-            String[] fields = {"Marketing & Business"};
-            for (AdmDivision d : allAdmDivisions) {
-                for (String subd : d.subdivisions) {
-                    for (String field : fields) {
-                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.BUSINESS, siteName, languageDetector);
-                        Metrics m = crawler.scan();
-                        METRICS.updateMetrics(m);
-                    }
-                }
-
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace(System.out);
-        }
-
-        //scan undervisning ######################################################################
-        try {
-            String[] fields = {"Undervisning & Pædagogik"};
-            for (AdmDivision d : allAdmDivisions) {
-                for (String subd : d.subdivisions) {
-                    for (String field : fields) {
-                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.RES_EDU, siteName, languageDetector);
-                        Metrics m = crawler.scan();
-                        METRICS.updateMetrics(m);}
-                }
-
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace(System.out);
-        }
-        
-        //scan kontor ######################################################################businessAndOffice
-        try {
-            String[] fields = {"Jura", "Administration"};
-            for (AdmDivision d : allAdmDivisions) {
-                for (String subd : d.subdivisions) {
-                    for (String field : fields) {
-                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.BUSINESS, siteName, languageDetector);
-                        Metrics m = crawler.scan();
-                        METRICS.updateMetrics(m);
-                    }
-                }
-
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace(System.out);
-        }
-
-        //scan social ######################################################################
-        try {
-            String[] fields = {"Medicinal & Sundhed"};
-            for (AdmDivision d : allAdmDivisions) {
-                for (String subd : d.subdivisions) {
-                    for (String field : fields) {
-                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.MED_SOC, siteName, languageDetector);
-                        Metrics m = crawler.scan();
-                        METRICS.updateMetrics(m);
-                    }
-                }
-
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace(System.out);
-        }
-
-        //scan ledelse ######################################################################
-        try {
-            String[] fields = {"Organisation & Ledelse", "Human Resources"};
-            for (AdmDivision d : allAdmDivisions) {
-                for (String subd : d.subdivisions) {
-                    for (String field : fields) {
-                        String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=100&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, JobCategories.LEADERSHIP, siteName, languageDetector);
-                        Metrics m = crawler.scan();
-                        METRICS.updateMetrics(m);
-                    }
-                }
-
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace(System.out);
-        }
-        
-        //scan oevrige ######################################################################
-        //#######nothing like this in this site
-        
-        //metrics
-        System.out.println(METRICS.toString()); 
-        return METRICS;
-    }
-
-    //Initialize the language detector with the profiles
-    private void setUpLangDetector() {
-        languageDetector = new LangDetect();
-        try {
-            String profilesPath = new Config().getProp("profiles_path");
-            languageDetector.init(profilesPath);
-        } catch (LangDetectException lde) {
-            lde.printStackTrace(System.out);
-        }
     }
 
     class AdmDivision {
+
         //variables
         String division;
         List<String> subdivisions;

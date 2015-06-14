@@ -175,7 +175,7 @@ public class MonsterController {
         System.out.println(METRICS.toString());
         return METRICS;
     }
-
+        
     //Initialize the language detector with the profiles
     private void setUpLangDetector() {
         languageDetector = new LangDetect();

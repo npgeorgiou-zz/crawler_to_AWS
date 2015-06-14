@@ -1,6 +1,5 @@
 package bin;
 
-import config.Config;
 import controllers.JobbankController;
 import controllers.JobbsafariController;
 import controllers.JobindexController;
@@ -32,8 +31,12 @@ public class Master {
     private static void scan() {
 
         // Empty DB
-        dbUtils.flushDatabase();
+//        dbUtils.flushDatabase();
        
+                //Jobnet
+        Metrics jnm = new JobnetController().start();
+        finalM.updateMetrics(jnm);
+        
         //Jobbank
         Metrics jbm = new JobbankController().start();
         finalM.updateMetrics(jbm);
@@ -46,15 +49,13 @@ public class Master {
         Metrics jim = new JobindexController().start();
         finalM.updateMetrics(jim);
 
-        //Jobnet
-        Metrics jnm = new JobnetController().start();
-        finalM.updateMetrics(jnm);
+
 
         //Jobbsafari
         Metrics jsm = new JobbsafariController().start();
         finalM.updateMetrics(jsm);
 
-        // Sout and save results
+        // Sout results
         System.out.println(jbm.toString());
         System.out.println(mm.toString());
         System.out.println(jim.toString());
@@ -62,8 +63,9 @@ public class Master {
         System.out.println(jsm.toString()); 
         System.out.println(finalM.toString()); 
 
+        // Save results
         // dbUtils.addMetricToDatabase(finalM)
-        //dbUtils.registerDbChange();
+        // dbUtils.registerDbChange();
     }
 
 }

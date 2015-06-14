@@ -223,15 +223,11 @@ public class JobbsafariCrawler {
                     // check if link leads to a pdf, or a ashx and handle them here as java will not open it
                     if (jobURL.contains(".pdf") || jobURL.contains(".ashx")) {
                         Job identifiedJob = null;
-                        try {
 
                            //temporarily set text as ""
                             jobSmallText = "";
-                            identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobSmallText, 1, city, foundAt, new ArrayList());
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace(System.out);
-                            METRICS.incrementExceptions();
-                        }
+                            identifiedJob = new Job(jobTitle, jobAnnouncer, jobURL, jobDate, jobSmallText, 1, city, foundAt, new ArrayList());
+
                         
                         Field f = new Field(jobCategory);
                         identifiedJob.addField(f);
@@ -291,7 +287,7 @@ public class JobbsafariCrawler {
                                 //temporarily set text as ""
                                 jobSmallText = "";
 
-                                Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobSmallText, 1, city, foundAt, new ArrayList());
+                                Job identifiedJob = new Job(jobTitle, jobAnnouncer, jobURL, jobDate, jobSmallText, 1, city, foundAt, new ArrayList());
                                 Field f = new Field(jobCategory);
                                 identifiedJob.addField(f);
                                 identifiedJob = filter.filterTitleForPossibleChangeInFields(identifiedJob, jobCategory, jobTitle);
@@ -420,16 +416,11 @@ public class JobbsafariCrawler {
                     // check if link leads to a pdf, or a ashx and handle them here as java will not open it
                     if (jobURL.contains(".pdf") || jobURL.contains(".ashx")) {
                         Job identifiedJob = null;
-                        try {
                             
                             //temporarily set text as ""
                             jobText = "";
 
-                            identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobText, 0, city, foundAt, new ArrayList());
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace(System.out);
-                            METRICS.incrementExceptions();
-                        }
+                            identifiedJob = new Job(jobTitle, jobAnnouncer, jobURL, jobDate, jobText, 0, city, foundAt, new ArrayList());
                         
                         Field f = new Field(jobCategory);
                         identifiedJob.addField(f);
@@ -486,7 +477,7 @@ public class JobbsafariCrawler {
                                 //temporarily set text as ""
                                 jobText = "";
 
-                                Job identifiedJob = new Job(jobTitle, jobAnnouncer, new URL(jobURL), jobDate, jobText, 0, city, foundAt, new ArrayList());
+                                Job identifiedJob = new Job(jobTitle, jobAnnouncer, jobURL, jobDate, jobText, 0, city, foundAt, new ArrayList());
                                 Field f = new Field(jobCategory);
                                 identifiedJob.addField(f);
                                 identifiedJob = filter.filterTitleForPossibleChangeInFields(identifiedJob, jobCategory, jobTitle);

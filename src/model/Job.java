@@ -60,14 +60,14 @@ public class Job implements Serializable {
     
 
     //constructors
-    public Job(String title, String company, URL url, Date postDate, String text, int paidJob, String area,
+    public Job(String title, String company, String url, Date postDate, String text, int paidJob, String area,
             String foundAt, ArrayList<Field> fields) {
         
         Filter filter = new Filter();
         
         this.title = filter.homogeniseJobTitle(title);
         this.company = filter.homogeniseCompanyName(company);
-        this.url = filter.homogeniseURL(url.toString());
+        this.url = filter.homogeniseURL(url);
         this.postDate = postDate;
         this.text = text;
         this.paidJob = paidJob;

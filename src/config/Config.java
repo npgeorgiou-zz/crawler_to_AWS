@@ -17,11 +17,9 @@ public class Config {
             prop.load(new FileInputStream(path));
             value = prop.getProperty(title);
         } catch (IOException e) {
-
         }
 
         return value;
-
     }
 
     public void saveProp(String title, String value) {
@@ -29,8 +27,6 @@ public class Config {
             prop.setProperty(title, value);
             prop.store(new FileOutputStream(path), null);
         } catch (IOException e) {
-
         }
-
     }
 }
