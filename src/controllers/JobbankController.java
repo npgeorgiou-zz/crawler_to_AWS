@@ -2,9 +2,6 @@ package controllers;
 
 import model.Metrics;
 import crawlers.JobbankCrawler;
-import crawlerUtils.LangDetect;
-import com.cybozu.labs.langdetect.LangDetectException;
-import config.Config;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,41 +9,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JobbankController {
+public class JobbankController extends BaseController{
 
-    private final String siteName;
-    private LangDetect languageDetector;
-    private final Metrics METRICS;
-
+    // declare variables
     Map<String, String> AC;
     Map<String, String> FC;
     List<AdmDivision> allAdmDivisions;
 
-    // Get categories names from Config file
-    Config c = new Config();
-    private final String ENGINEER = c.getProp("engineer_dbname");
-    private final String IT = c.getProp("it_dbname");
-    private final String BUSINESS_OFFICE = c.getProp("business_dbname");
-    private final String MARKETING = c.getProp("marketing_dbname");
-    private final String LEADERSHIP = c.getProp("leadership_dbname");
-    private final String SERVICE = c.getProp("service_dbname");
-    private final String INDUSTRY = c.getProp("industry_dbname");
-    private final String RES_EDU = c.getProp("res_edu_dbname");
-    private final String MED_SOC = c.getProp("med_soc_dbname");
-    private final String STUDENT = c.getProp("student_dbname");
+    // constructor
+    public JobbankController(String jobsiteName) {
+        super(jobsiteName);
 
-    //constructor
-    public JobbankController() {
-        siteName = "Jobbank";
-        METRICS = new Metrics(siteName);
-        
-        setUpLangDetector();
         setUpAreaCodes();
         setUpFieldCodes();
         setUpAdministrativeDivisions();
     }
 
-    //methods
+    // methods
     public Metrics start(){
         //scan engineer ######################################################################
         try {
@@ -57,7 +36,7 @@ public class JobbankController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, ENGINEER, siteName, languageDetector);
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, ENGINEER, jobsiteName, languageDetector);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
                     }
@@ -75,7 +54,7 @@ public class JobbankController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, IT, siteName, languageDetector);
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, IT, jobsiteName, languageDetector);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
                     }
@@ -98,7 +77,7 @@ public class JobbankController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, BUSINESS_OFFICE, siteName, languageDetector);
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, BUSINESS_OFFICE, jobsiteName, languageDetector);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
                     }
@@ -116,7 +95,7 @@ public class JobbankController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, RES_EDU, siteName, languageDetector);
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, RES_EDU, jobsiteName, languageDetector);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
                     }
@@ -134,7 +113,7 @@ public class JobbankController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, BUSINESS_OFFICE, siteName, languageDetector);
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, BUSINESS_OFFICE, jobsiteName, languageDetector);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
                     }
@@ -152,7 +131,7 @@ public class JobbankController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, MED_SOC, siteName, languageDetector);
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, MED_SOC, jobsiteName, languageDetector);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
                     }
@@ -170,7 +149,7 @@ public class JobbankController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://jobbank.dk/job/?act=find&key=" + "&udd=" + FC.get(field) + "&amt=" + AC.get(subd) + "&max=500&oprettet=";
-                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, LEADERSHIP, siteName, languageDetector);
+                        JobbankCrawler crawler = new JobbankCrawler(URL, d.division, LEADERSHIP, jobsiteName, languageDetector);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
                     }
@@ -186,17 +165,6 @@ public class JobbankController {
         //metrics
         System.out.println(METRICS.toString());
         return METRICS;
-    }
-
-    //Initialize the language detector with the profiles
-    private void setUpLangDetector() {
-        languageDetector = new LangDetect();
-        try {
-            String profilesPath = new Config().getProp("profiles_path");
-            languageDetector.init(profilesPath);
-        } catch (LangDetectException lde) {
-            lde.printStackTrace(System.out);
-        }
     }
 
     private void setUpAreaCodes() {

@@ -33,26 +33,26 @@ public class Master {
         // Empty DB
         dbUtils.flushDatabase();
          
-               Metrics jnm = new JobnetController().start();
+        Metrics jnm = new JobnetController("Jobnet").start();
         finalM.updateMetrics(jnm);
-        
+
         //Jobbank
-        Metrics jbm = new JobbankController().start();
+        Metrics jbm = new JobbankController("Jobbank").start();
         finalM.updateMetrics(jbm);
 
         //Monster
-        Metrics mm = new MonsterController().start();
+        Metrics mm = new MonsterController("Monster").start();
         finalM.updateMetrics(mm);
 
         //Jobindex
-        Metrics jim = new JobindexController().start();
+        Metrics jim = new JobindexController("Jobindex").start();
         finalM.updateMetrics(jim);
 
         //Jobnet
  
 
         //Jobbsafari
-        Metrics jsm = new JobbsafariController().start();
+        Metrics jsm = new JobbsafariController("Jobsafari").start();
         finalM.updateMetrics(jsm);
 
         // Sout results

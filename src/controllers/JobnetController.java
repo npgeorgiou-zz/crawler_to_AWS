@@ -2,68 +2,28 @@ package controllers;
 
 import model.Metrics;
 import crawlers.JobnetCrawler;
-import com.cybozu.labs.langdetect.LangDetectException;
-import config.Config;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import crawlerUtils.LangDetect;
-import sharedUtilities.JobCategories;
 
-public class JobnetController {
+public class JobnetController extends BaseController{
 
-    //declare variables
-    private final String siteName;
-    private LangDetect languageDetector;
-    private final Metrics METRICS;
-
+    // declare variables
     Map<String, String> AC;
     Map<String, String> FC;
     String[] areas;
 
-    //constructor
-    public JobnetController() {
-        siteName = "Jobnet";
-        METRICS = new Metrics(siteName);
+    
+    // constructor
+    public JobnetController(String jobsiteName) {
+        super(jobsiteName);
 
-        setUpLangDetector();
-
-        AC = new HashMap<>();
-        AC.put("Copenhagen", "1084"); // Hovedstaden og Bornholm
-        AC.put("Zealand", "1085"); // Øvrige Sjælland
-        AC.put("Middle Jylland", "1082"); // Midtjylland
-        AC.put("North Jylland", "1081"); // Nordjylland
-        AC.put("South Denmark", "1083"); // Syddanmark
-        AC.put("Greenland & Faroe", "9999"); // Grønland
-
-        FC = new HashMap<>();
-        //FC.put("Hotjob", "999"); add &hotjob=1 to URL for this
-        FC.put("Bygge og anlæg", "40000");
-        FC.put("Design, formgivning og grafisk arbejde", "150000");
-        FC.put("Elever", "230000");
-        FC.put("Hotel, restauration, køkken, kantine", "130000");
-        FC.put("Industriel produktion", "60000");
-        FC.put("It og teleteknik", "110000");
-        FC.put("Jern, metal og auto", "50000");
-        FC.put("Kontor, administration, regnskab og finans", "80000");
-        FC.put("Landbrug, skovbrug, gartneri, fiskeri og dyrepleje", "170000");
-        FC.put("Ledelse", "220000");
-        FC.put("Medie, kultur, turisme, idr æt og underholdning", "100000");
-        FC.put("Nærings- og nydelsesmiddel", "190000");
-        FC.put("Pædagogisk, socialt og kirkeligt arbejde", "30000");
-        FC.put("Rengøring, ejendomsservice og renovation", "140000");
-        FC.put("Salg, indkøb og markedsføring", "90000");
-        FC.put("Sundhed, omsorg og personlig pleje", "10000");
-        FC.put("Tekstil og bekl ædning", "180000");
-        FC.put("Transport, post, lager- og maskinførerarbejde", "120000");
-        FC.put("Træ, møbel, glas og keramik", "200000");
-        FC.put("Undervisning og vejledning", "20000");
-        FC.put("Vagt, sikkerhed og overvågning", "160000");
-
+        setUpAreaCodes();
+        setUpFieldCodes();
         areas = AC.keySet().toArray(new String[AC.size()]);
     }
 
-    //methods
+    // methods
     public Metrics start() {
 //        //scan engineer ######################################################################
 //        //nothing like this on this site
@@ -89,7 +49,7 @@ public class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.IT, siteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, IT, jobsiteName, languageDetector);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -107,7 +67,7 @@ public class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.SERVICE, siteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, SERVICE, jobsiteName, languageDetector);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -126,7 +86,7 @@ public class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.SERVICE, siteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, SERVICE, jobsiteName, languageDetector);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -143,7 +103,7 @@ public class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.BUSINESS, siteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, BUSINESS_OFFICE, jobsiteName, languageDetector);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -160,7 +120,7 @@ public class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.RES_EDU, siteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, RES_EDU, jobsiteName, languageDetector);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -177,7 +137,7 @@ public class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.BUSINESS, siteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, BUSINESS_OFFICE, jobsiteName, languageDetector);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -194,7 +154,7 @@ public class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.MED_SOC, siteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, MED_SOC, jobsiteName, languageDetector);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -211,7 +171,7 @@ public class JobnetController {
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, JobCategories.LEADERSHIP, siteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(URL, area, LEADERSHIP, jobsiteName, languageDetector);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -229,15 +189,40 @@ public class JobnetController {
         System.out.println(METRICS.toString()); 
         return METRICS;
     }
-
-    //Initialize the language detector with the profiles
-    private void setUpLangDetector() {
-        languageDetector = new LangDetect();
-        try {
-            String profilesPath = new Config().getProp("profiles_path");
-            languageDetector.init(profilesPath);
-        } catch (LangDetectException lde) {
-            lde.printStackTrace(System.out);
-        }
+    
+    private void setUpAreaCodes() {
+        AC = new HashMap<>();
+        AC.put("Copenhagen", "1084"); // Hovedstaden og Bornholm
+        AC.put("Zealand", "1085"); // Øvrige Sjælland
+        AC.put("Middle Jylland", "1082"); // Midtjylland
+        AC.put("North Jylland", "1081"); // Nordjylland
+        AC.put("South Denmark", "1083"); // Syddanmark
+        AC.put("Greenland & Faroe", "9999"); // Grønland
+    }
+    
+    private void setUpFieldCodes() {   
+        FC = new HashMap<>();
+        //FC.put("Hotjob", "999"); add &hotjob=1 to URL for this
+        FC.put("Bygge og anlæg", "40000");
+        FC.put("Design, formgivning og grafisk arbejde", "150000");
+        FC.put("Elever", "230000");
+        FC.put("Hotel, restauration, køkken, kantine", "130000");
+        FC.put("Industriel produktion", "60000");
+        FC.put("It og teleteknik", "110000");
+        FC.put("Jern, metal og auto", "50000");
+        FC.put("Kontor, administration, regnskab og finans", "80000");
+        FC.put("Landbrug, skovbrug, gartneri, fiskeri og dyrepleje", "170000");
+        FC.put("Ledelse", "220000");
+        FC.put("Medie, kultur, turisme, idr æt og underholdning", "100000");
+        FC.put("Nærings- og nydelsesmiddel", "190000");
+        FC.put("Pædagogisk, socialt og kirkeligt arbejde", "30000");
+        FC.put("Rengøring, ejendomsservice og renovation", "140000");
+        FC.put("Salg, indkøb og markedsføring", "90000");
+        FC.put("Sundhed, omsorg og personlig pleje", "10000");
+        FC.put("Tekstil og bekl ædning", "180000");
+        FC.put("Transport, post, lager- og maskinførerarbejde", "120000");
+        FC.put("Træ, møbel, glas og keramik", "200000");
+        FC.put("Undervisning og vejledning", "20000");
+        FC.put("Vagt, sikkerhed og overvågning", "160000");
     }
 }

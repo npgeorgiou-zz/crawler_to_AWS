@@ -2,43 +2,25 @@ package controllers;
 
 import model.Metrics;
 import crawlers.MonsterCrawler;
-import com.cybozu.labs.langdetect.LangDetectException;
-import config.Config;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import crawlerUtils.LangDetect;
-import sharedUtilities.JobCategories;
 
-public class MonsterController {
-    
-    //declare variables
-    private final String siteName;
-    private static LangDetect languageDetector;
-    private final Metrics METRICS;
+public class MonsterController extends BaseController {
 
+    // declare variables
     Map<String, String> AC;
     String[] areas;
 
-    //constructor
-    public MonsterController() {
-        siteName = "Monster";
-        METRICS = new Metrics(siteName);
-
-        setUpLangDetector();
-
-        AC = new HashMap<>();
-        AC.put("Copenhagen", "Hovedstaden");
-        AC.put("Zealand", "Sjælland");
-        AC.put("North Jylland", "Nordjylland");
-        AC.put("Middle Jylland", "Midtjylland");
-        AC.put("South Denmark", "Syddanmark");
-
+    // constructor
+    public MonsterController(String jobsiteName) {
+        super(jobsiteName);
+        
+        setUpAreaCodes();
         areas = AC.keySet().toArray(new String[AC.size()]);
-
     }
 
-    //methods
+    // methods
     public Metrics start() {
         //scan engineer ######################################################################
         try {
@@ -46,7 +28,7 @@ public class MonsterController {
 
             for (String area : areas) {
                 String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.ENGINEER, siteName, languageDetector);
+                MonsterCrawler crawler = new MonsterCrawler(URL, area, ENGINEER, jobsiteName, languageDetector);
                 Metrics m = crawler.scan();
                 METRICS.updateMetrics(m);
             }
@@ -61,7 +43,7 @@ public class MonsterController {
 
             for (String area : areas) {
                 String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.IT, siteName, languageDetector);
+                MonsterCrawler crawler = new MonsterCrawler(URL, area, IT, jobsiteName, languageDetector);
                 Metrics m = crawler.scan();
                 METRICS.updateMetrics(m);
             }
@@ -77,7 +59,7 @@ public class MonsterController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.SERVICE, siteName, languageDetector);
+                    MonsterCrawler crawler = new MonsterCrawler(URL, area, SERVICE, jobsiteName, languageDetector);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -93,7 +75,7 @@ public class MonsterController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.SERVICE, siteName, languageDetector);
+                    MonsterCrawler crawler = new MonsterCrawler(URL, area, SERVICE, jobsiteName, languageDetector);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -109,7 +91,7 @@ public class MonsterController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.BUSINESS, siteName, languageDetector);
+                    MonsterCrawler crawler = new MonsterCrawler(URL, area, BUSINESS_OFFICE, jobsiteName, languageDetector);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -124,7 +106,7 @@ public class MonsterController {
 
             for (String area : areas) {
                 String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.RES_EDU, siteName, languageDetector);
+                MonsterCrawler crawler = new MonsterCrawler(URL, area, RES_EDU, jobsiteName, languageDetector);
                 Metrics m = crawler.scan();
                 METRICS.updateMetrics(m);
             }
@@ -140,7 +122,7 @@ public class MonsterController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.BUSINESS, siteName, languageDetector);
+                    MonsterCrawler crawler = new MonsterCrawler(URL, area, BUSINESS_OFFICE, jobsiteName, languageDetector);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -157,7 +139,7 @@ public class MonsterController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawler = new MonsterCrawler(URL, area, JobCategories.LEADERSHIP, siteName, languageDetector);
+                    MonsterCrawler crawler = new MonsterCrawler(URL, area, LEADERSHIP, jobsiteName, languageDetector);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -167,23 +149,21 @@ public class MonsterController {
             e1.printStackTrace(System.out);
         }
 
-//        //scan social ######################################################################
-//        //#######nothing like this in this site
-//        //scan oevrige ######################################################################
-//        //#######nothing like this in this site
+        //scan social ######################################################################
+        //#######nothing like this in this site
+        //scan oevrige ######################################################################
+        //#######nothing like this in this site
         //metrics
         System.out.println(METRICS.toString());
         return METRICS;
     }
-        
-    //Initialize the language detector with the profiles
-    private void setUpLangDetector() {
-        languageDetector = new LangDetect();
-        try {
-            String profilesPath = new Config().getProp("profiles_path");
-            languageDetector.init(profilesPath);
-        } catch (LangDetectException lde) {
-            lde.printStackTrace(System.out);
-        }
+
+    private void setUpAreaCodes() {
+        AC = new HashMap<>();
+        AC.put("Copenhagen", "Hovedstaden");
+        AC.put("Zealand", "Sjælland");
+        AC.put("North Jylland", "Nordjylland");
+        AC.put("Middle Jylland", "Midtjylland");
+        AC.put("South Denmark", "Syddanmark");
     }
 }
