@@ -2,6 +2,7 @@ package controllers;
 
 import model.Metrics;
 import crawlers.JobindexCrawler;
+import di.DI;
 import java.io.IOException;
 import java.util.Map;
 import java.util.ArrayList;
@@ -16,8 +17,8 @@ public class JobindexController extends BaseController {
     String[] areas;
 
     // constructor
-    public JobindexController(String jobsiteName) {
-        super(jobsiteName);
+    public JobindexController(String jobsiteName, DI di) {
+        super(jobsiteName, di);
 
         setUpAdministrativeDivisions();
     }
@@ -31,7 +32,7 @@ public class JobindexController extends BaseController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://tech.jobindex.dk/job/ingenioer" + "/" + field + "/" + subd;
-                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, ENGINEER, jobsiteName, languageDetector);
+                        JobindexCrawler crawler = new JobindexCrawler(di, URL, d.division, ENGINEER, jobsiteName);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
 
@@ -49,7 +50,7 @@ public class JobindexController extends BaseController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://it.jobindex.dk/job/it" + "/" + field + "/" + subd;
-                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, IT, jobsiteName, languageDetector);
+                        JobindexCrawler crawler = new JobindexCrawler(di, URL, d.division, IT, jobsiteName);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
 
@@ -67,7 +68,7 @@ public class JobindexController extends BaseController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/handel" + "/" + field + "/" + subd;
-                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, SERVICE, jobsiteName, languageDetector);
+                        JobindexCrawler crawler = new JobindexCrawler(di, URL, d.division, SERVICE, jobsiteName);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
 
@@ -84,7 +85,7 @@ public class JobindexController extends BaseController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/industri" + "/" + field + "/" + subd;
-                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, SERVICE, jobsiteName, languageDetector);
+                        JobindexCrawler crawler = new JobindexCrawler(di, URL, d.division, SERVICE, jobsiteName);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
 
@@ -101,7 +102,7 @@ public class JobindexController extends BaseController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/salg" + "/" + field + "/" + subd;
-                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, BUSINESS_OFFICE, jobsiteName, languageDetector);
+                        JobindexCrawler crawler = new JobindexCrawler(di, URL, d.division, BUSINESS_OFFICE, jobsiteName);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
 
@@ -119,7 +120,7 @@ public class JobindexController extends BaseController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/undervisning" + "/" + field + "/" + subd;
-                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, RES_EDU, jobsiteName, languageDetector);
+                        JobindexCrawler crawler = new JobindexCrawler(di, URL, d.division, RES_EDU, jobsiteName);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
 
@@ -139,7 +140,7 @@ public class JobindexController extends BaseController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/kontor" + "/" + field + "/" + subd;
-                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, BUSINESS_OFFICE, jobsiteName, languageDetector);
+                        JobindexCrawler crawler = new JobindexCrawler(di, URL, d.division, BUSINESS_OFFICE, jobsiteName);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
 
@@ -150,7 +151,7 @@ public class JobindexController extends BaseController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields2) {
                         String URL = "http://www.jobindex.dk/job/ledelse" + "/" + field + "/" + subd;
-                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, BUSINESS_OFFICE, jobsiteName, languageDetector);
+                        JobindexCrawler crawler = new JobindexCrawler(di, URL, d.division, BUSINESS_OFFICE, jobsiteName);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
 
@@ -168,7 +169,7 @@ public class JobindexController extends BaseController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/social" + "/" + field + "/" + subd;
-                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, MED_SOC, jobsiteName, languageDetector);
+                        JobindexCrawler crawler = new JobindexCrawler(di, URL, d.division, MED_SOC, jobsiteName);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
 
@@ -186,7 +187,7 @@ public class JobindexController extends BaseController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/oevrige" + "/" + field + "/" + subd;
-                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, STUDENT, jobsiteName, languageDetector);
+                        JobindexCrawler crawler = new JobindexCrawler(di, URL, d.division, STUDENT, jobsiteName);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
 
@@ -204,7 +205,7 @@ public class JobindexController extends BaseController {
                 for (String subd : d.subdivisions) {
                     for (String field : fields) {
                         String URL = "http://www.jobindex.dk/job/ledelse" + "/" + field + "/" + subd;
-                        JobindexCrawler crawler = new JobindexCrawler(URL, d.division, LEADERSHIP, jobsiteName, languageDetector);
+                        JobindexCrawler crawler = new JobindexCrawler(di, URL, d.division, LEADERSHIP, jobsiteName);
                         Metrics m = crawler.scan();
                         METRICS.updateMetrics(m);
 

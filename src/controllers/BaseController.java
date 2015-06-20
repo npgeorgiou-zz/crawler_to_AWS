@@ -1,47 +1,47 @@
 package controllers;
 
-import com.cybozu.labs.langdetect.LangDetectException;
-import config.Config;
-import crawlerUtils.LangDetect;
+import di.Config;
+import di.DI;
 import model.Metrics;
 
 public class BaseController {
 
-    // declare variables
+    // Declare variables
+    protected DI di;
     protected String jobsiteName;
-    protected final Metrics METRICS;
-    protected static LangDetect languageDetector;
+    protected Config c;
+    protected final Metrics METRICS; 
 
-    // Get categories names from Config file
-    Config c = new Config();
-    protected final String ENGINEER = c.getProp("engineer_dbname");
-    protected final String IT = c.getProp("it_dbname");
-    protected final String BUSINESS_OFFICE = c.getProp("business_dbname");
-    protected final String MARKETING = c.getProp("marketing_dbname");
-    protected final String LEADERSHIP = c.getProp("leadership_dbname");
-    protected final String SERVICE = c.getProp("service_dbname");
-    protected final String INDUSTRY = c.getProp("industry_dbname");
-    protected final String RES_EDU = c.getProp("res_edu_dbname");
-    protected final String MED_SOC = c.getProp("med_soc_dbname");
-    protected final String STUDENT = c.getProp("student_dbname");
+    protected final String ENGINEER;
+    protected final String IT;
+    protected final String BUSINESS_OFFICE;
+    protected final String MARKETING;
+    protected final String LEADERSHIP;
+    protected final String SERVICE;
+    protected final String INDUSTRY;
+    protected final String RES_EDU;
+    protected final String MED_SOC;
+    protected final String STUDENT;
 
-    // constructor
-    public BaseController(String jobsiteName) {
-        METRICS = new Metrics(jobsiteName);
+    // Constructor
+    public BaseController(String jobsiteName, DI di) {
+        this.di = di;
         this.jobsiteName = jobsiteName;
-        setUpLangDetector();
+        c = di.getConfig();
+        METRICS = new Metrics(jobsiteName);
+        
+        // Get categories names from Config file
+        ENGINEER = c.getProp("engineer_dbname");
+        IT = c.getProp("it_dbname");
+        BUSINESS_OFFICE = c.getProp("business_dbname");
+        MARKETING = c.getProp("marketing_dbname");
+        LEADERSHIP = c.getProp("leadership_dbname");
+        SERVICE = c.getProp("service_dbname");
+        INDUSTRY = c.getProp("industry_dbname");
+        RES_EDU = c.getProp("res_edu_dbname");
+        MED_SOC = c.getProp("med_soc_dbname");
+        STUDENT = c.getProp("student_dbname");      
     }
 
-    //methods
-    //Initialize the language detector with the profiles
-    protected final void setUpLangDetector() {
-        languageDetector = new LangDetect();
-        try {
-            String profilesPath = new Config().getProp("profiles_path");
-            languageDetector.init(profilesPath);
-        } catch (LangDetectException lde) {
-            lde.printStackTrace(System.out);
-        }
-    }
-
+    // Methods
 }

@@ -1,4 +1,4 @@
-package crawlerUtils;
+package di;
 
 import java.util.ArrayList;
 import com.cybozu.labs.langdetect.Detector;

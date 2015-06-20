@@ -1,9 +1,7 @@
 package crawlers;
 
 import com.cybozu.labs.langdetect.LangDetectException;
-import crawlerUtils.Filter;
-import crawlerUtils.LangDetect;
-import dbUtils.DatabaseUtils;
+import di.DI;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -18,30 +16,25 @@ import model.Metrics;
 
 public class BaseCrawler {
 
-    // declare variables
-    protected boolean danish = false;
+    // Declare variables
+    protected DI di;
     protected final Metrics METRICS;
 
     protected String URL;
     protected String area;
     protected String jobCategory;
     protected String foundAt;
-    protected LangDetect languageDetector;
-    protected Filter filter;
-    protected DatabaseUtils dbUtils;
+    protected boolean danish = false;
 
-    // constructor
-    public BaseCrawler(String URL, String area, String jobCategory, String foundAt, LangDetect languageDetector) {
+    // Constructor
+    public BaseCrawler(DI di, String URL, String area, String jobCategory, String foundAt) {
+        this.di = di;
+        METRICS = new Metrics(foundAt);
 
         this.URL = URL;
         this.area = area;
         this.jobCategory = jobCategory;
         this.foundAt = foundAt;
-        this.languageDetector = languageDetector;
-
-        filter = new Filter();
-        METRICS = new Metrics(foundAt);
-        dbUtils = new DatabaseUtils();
 
         try {
             setTrustAllCerts();
@@ -52,9 +45,9 @@ public class BaseCrawler {
 
     }
 
-// methods
+        // Methods
     // TODO: finalize and settle one one Manager. Make tests and choose
-        private void setTrustAllCerts() throws Exception {
+    private void setTrustAllCerts() throws Exception {
         TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
             public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                 return null;
@@ -96,7 +89,7 @@ public class BaseCrawler {
         // Install the all-trusting host verifier
         HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
     }
-        
+
 //    private void setTrustAllCerts() throws Exception {
 //        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
 //            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
@@ -126,11 +119,10 @@ public class BaseCrawler {
 //            METRICS.incrementExceptions();
 //        }
 //    }
-    
     protected boolean isEnglish(String text) {
         boolean english = false;
         try {
-            english = languageDetector.detect(text).equalsIgnoreCase("en");
+            english = di.getLanguageDetector().detect(text).equalsIgnoreCase("en");
         } catch (LangDetectException e) {
             METRICS.incrementExceptions();
             // e.printStackTrace(System.out);

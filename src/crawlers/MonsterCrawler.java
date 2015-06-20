@@ -9,7 +9,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import crawlerUtils.LangDetect;
+import di.DI;
 import model.Metrics;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,15 +18,15 @@ import model.Job;
 
 public class MonsterCrawler extends BaseCrawler {
 
-    // declare variables
+    // Declare variables
 
-    // constructor
-    public MonsterCrawler(String URL, String area, String jobCategory, String foundAt, LangDetect languageDetector) throws IOException {
-        super(URL, area, jobCategory, foundAt, languageDetector);
+    // Constructor
+    public MonsterCrawler(DI di, String URL, String area, String jobCategory, String foundAt) throws IOException {
+        super(di, URL, area, jobCategory, foundAt);
     }
 
     public Metrics scan() {
-        // sanitize url
+        // Sanitize url
         URL = URL.replaceAll("ø", "%C3%B8")
                 .replaceAll("å", "%C3%A5")
                 .replaceAll("æ", "%C3%A6")
@@ -44,25 +44,25 @@ public class MonsterCrawler extends BaseCrawler {
         while (true) {
             try {
 
-                // read page and return arrayList of paid Jobs
+                // Read page and return arrayList of paid Jobs
                 ArrayList<Job> paidJobs = scanPage(doc, "odd", "even", area, foundAt);
 
                 // save Jobs
-                int duplicateJobs = dbUtils.deleteDuplicatesAndAddtoDB(paidJobs);
+                int duplicateJobs = di.getDB().deleteDuplicatesAndAddtoDB(paidJobs);
                 METRICS.setDuplicateJobs(METRICS.getDuplicateJobs() + duplicateJobs);
             } catch (ParseException pe) {
                 METRICS.incrementExceptions();
                 pe.printStackTrace(System.out);
             }
-            // connect to next pages, if there are any
+            // Connect to next pages, if there are any
             try {
                 Element paginationDiv = doc.getElementsByClass("navigationBar").first();
 
-                // if there is pagination, therefore if there are other pages
+                // If there is pagination, therefore if there are other pages
                 if (paginationDiv != null) {
                     Element aWithClassLast = paginationDiv.getElementsByClass("last").first();
                     if (aWithClassLast == null) {
-                        //this isnt the last page
+                        // This isnt the last page
                         // System.out.println("this isnt the last page");
                         URL = paginationDiv.select("a").last().attr("abs:href");
                     } else {
@@ -97,7 +97,7 @@ public class MonsterCrawler extends BaseCrawler {
 
     private ArrayList<Job> scanPage(Document doc, String tag1, String tag2, String city, String foundAt)
             throws ParseException {
-        // get paid jobs table rows
+        // Get paid jobs table rows
         ArrayList<Job> jobs = new ArrayList<>();
         Elements paidJobTableRowsOdd = doc.getElementsByClass(tag1);
         Elements paidJobTableRowsEven = doc.getElementsByClass(tag2);
@@ -106,10 +106,10 @@ public class MonsterCrawler extends BaseCrawler {
         allRows.addAll(paidJobTableRowsEven);
         METRICS.setAllJobs(METRICS.getAllJobs() + allRows.size());
 
-        // scan all rows
+        // Scan all rows
         for (Element paidJobRow : allRows) {
 
-            // get ad link url
+            // Get ad link url
             String jobURL = paidJobRow.select("a[href]").first().attr("abs:href");
 
             // Open connection to joblink
@@ -118,32 +118,32 @@ public class MonsterCrawler extends BaseCrawler {
                 internalDocument = Jsoup.connect(jobURL).timeout(20000).get();
                 Element internalDocumentBody = internalDocument.select("body").first();
 
-                // if page has text content
+                // If page has text content
                 if (!internalDocumentBody.text().trim().isEmpty()) {
 
-                    //take main div that holds ad text
+                    // Take main div that holds ad text
                     String mainText = getMainDiv(internalDocumentBody);
 
-                    // check for english
+                    // Check for english
                     danish = !isEnglish(mainText);
 
-                    // check if ad required danish even if its written in English
-                    if (filter.checkIfRequiresDanish(mainText)) {
+                    // Check if ad required danish even if its written in English
+                    if (di.getFilter().checkIfRequiresDanish(mainText)) {
                         // System.out.println("Danish requirement:" + internalDocument.baseUri());
                         danish = true;
                     }
 
                     if (danish == false) {
 
-                        // job is what we are looking for
-                        // now we try to bypass monster internal pages, if we can
+                        // Job is what we are looking for
+                        // Now we try to bypass monster internal pages, if we can
                         String realURL = "";
                         Elements scriptElement = internalDocument.getElementsByTag("script");
                         for (Element s : scriptElement) {
                             if (s.html().contains("ApplyOnlineUrl: ")) {
                                 realURL = s.html().split("ApplyOnlineUrl: '")[1].split("',")[0];
 
-                                //if realURL is not an internal monster url, or is not like : ApplyOnlineUrl: ''
+                                // If realURL is not an internal monster url, or is not like : ApplyOnlineUrl: ''
                                 if (!(realURL.contains("mit.monster.dk") || realURL.contains("mitt.monster.se")) 
                                         && realURL.length() != 0) {
                                     jobURL = realURL;
@@ -151,14 +151,14 @@ public class MonsterCrawler extends BaseCrawler {
                             }
                         }
 
-                        // get info that we need
-                        // get job title
+                        // Get info that we need
+                        // Get job title
                         String jobTitle = paidJobRow.select("div[class = jobTitleContainer]").text();
 
-                        // get company
+                        // Get company
                         String jobAnnouncer = paidJobRow.select("div[class = companyContainer]").select("a[href]").attr("title");
 
-                        // get publication date
+                        // Get publication date
                         String daysPublished = paidJobRow.select("div[class = fnt20]").text()
                                 .replace("Publiceret: ", "")
                                 .replace(" dage siden", "")
@@ -176,18 +176,15 @@ public class MonsterCrawler extends BaseCrawler {
                         }
                         System.out.println("________________________________________________" + "\r\n");
 
-                        // temporarily set text as "" so as not to overload DB
-                        mainText = "";
-
-                        Job identifiedJob = new Job(jobTitle, jobAnnouncer, jobURL, jobDate, mainText, 1, city, foundAt, new ArrayList());
+                        Job identifiedJob = new Job(di, jobTitle, jobAnnouncer, jobURL, jobDate, mainText, 1, city, foundAt, new ArrayList());
                         Field f = new Field(jobCategory);
                         identifiedJob.addField(f);
-                        identifiedJob = filter.filterTitleForPossibleChangeInFields(identifiedJob, jobCategory, jobTitle);
+                        identifiedJob = di.getFilter().filterTitleForPossibleChangeInFields(identifiedJob, jobCategory, jobTitle);
 
                         jobs.add(identifiedJob);
                         METRICS.incrementJobsInEnglish();
                     } else {
-//                            System.out.println("LANGUAGE NOT ENGLISH " + mainText);
+                        // System.out.println("LANGUAGE NOT ENGLISH " + mainText);
                     }
                 }
 
@@ -202,67 +199,67 @@ public class MonsterCrawler extends BaseCrawler {
     private String getMainDiv(Element internalDocumentBody) {
         Element mainDiv = internalDocumentBody.select("div[itemprop = description]").first();
 
-        //if this page format doesnt exist, then maindiv is <div id="jobBodyContent">
+        // If this page format doesnt exist, then maindiv is <div id="jobBodyContent">
         if (mainDiv == null) {
             mainDiv = internalDocumentBody.select("div[id = jobBodyContent]").first();
         }
 
-        //if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+        // If this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
         if (mainDiv == null) {
             mainDiv = internalDocumentBody.select("div[id = CJT-jobBodyContent]").first();
         }
 
-        //if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+        // If this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
         if (mainDiv == null) {
             mainDiv = internalDocumentBody.select("div[id = CJT-jobdesc]").first();
         }
 
-        //if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+        // If this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
         if (mainDiv == null) {
             mainDiv = internalDocumentBody.select("div[id = contentleft]").first();
         }
 
-        //if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+        // If this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
         if (mainDiv == null) {
             mainDiv = internalDocumentBody.select("div[id = left_wrapper]").first();
         }
 
-        //if this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
+        // If this page format doesnt exist, then maindiv is <div id="CJT-jobBodyContent">
         if (mainDiv == null) {
             mainDiv = internalDocumentBody.select("div[id = left_column]").first();
         }
 
-        //if this page format doesnt exist, then maindiv is <div id="TrackingJobBody">
+        // If this page format doesnt exist, then maindiv is <div id="TrackingJobBody">
         if (mainDiv == null) {
             mainDiv = internalDocumentBody.select("span[id = TrackingJobBody]").first();
         }
 
-        //if this page format doesnt exist, then maindiv is <div id="mycontent">
+        // If this page format doesnt exist, then maindiv is <div id="mycontent">
         if (mainDiv == null) {
             mainDiv = internalDocumentBody.select("div[id = textWrap]").first();
         }
 
-        //if this page format doesnt exist, then maindiv is <div id="mycontent">
+        // If this page format doesnt exist, then maindiv is <div id="mycontent">
         if (mainDiv == null) {
             mainDiv = internalDocumentBody.select("div[id = mycontent]").first();
         }
 
-        //if this page format doesnt exist, then maindiv is <div class = "jDespHolder">
+        // If this page format doesnt exist, then maindiv is <div class = "jDespHolder">
         if (mainDiv == null) {
             mainDiv = internalDocumentBody.select("div[id = jobdesc]").first();
         }
 
-        //if this page format doesnt exist, then maindiv is <div class = "jDespHolder">
+        // If this page format doesnt exist, then maindiv is <div class = "jDespHolder">
         if (mainDiv == null) {
             mainDiv = internalDocumentBody.select("div[class = main]").first();
         }
 
-        //if this page format doesnt exist, then maindiv is <span itemprop="description">
+        // If this page format doesnt exist, then maindiv is <span itemprop="description">
         if (mainDiv == null) {
             mainDiv = internalDocumentBody.select("span[itemprop = description]").first();
         }
 
-        //if this page format doesnt exist, set whole doc
+        // If this page format doesnt exist, set whole doc
         if (mainDiv == null) {
             mainDiv = internalDocumentBody;
         }
@@ -270,7 +267,7 @@ public class MonsterCrawler extends BaseCrawler {
         // if the text of the mainDiv is nothing, put whole document text as text
         String mainText = mainDiv.text();
 
-        //if this page format doesnt exist, set whole doc
+        // If this page format doesnt exist, set whole doc
         if (mainText.equals("")) {
             mainText = internalDocumentBody.text();
         }

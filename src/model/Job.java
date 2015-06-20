@@ -1,6 +1,8 @@
 package model;
 
-import crawlerUtils.Filter;
+import di.Config;
+import di.DI;
+import di.Filter;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -51,22 +53,21 @@ public class Job implements Serializable {
     @Column()
     String foundAt;
 
-    @OneToMany(mappedBy="job", cascade= CascadeType.ALL)
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL)
     private List<Field> fields;
-    
-    
 
     //constructors
-    public Job(String title, String company, String url, Date postDate, String text, int paidJob, String area,
+    public Job(DI di, String title, String company, String url, Date postDate, String text, int paidJob, String area,
             String foundAt, ArrayList<Field> fields) {
-        
-        Filter filter = new Filter();
-        
-        this.title = filter.homogeniseJobTitle(title);
-        this.company = filter.homogeniseCompanyName(company);
-        this.url = filter.homogeniseURL(url);
+        Config c = di.getConfig();
+        Filter filter = di.getFilter();
+
+        this.title = (c.getProp("filter_title").equals("true")) ? filter.homogeniseJobTitle(title) : title;
+        this.company = (c.getProp("filter_company").equals("true")) ? filter.homogeniseCompanyName(company) : company;
+        this.url = (c.getProp("filter_url").equals("true")) ? filter.homogeniseURL(url) : url;
+
         this.postDate = postDate;
-        this.text = text;
+        this.text = (c.getProp("full_job_text").equals("true")) ? text : "";
         this.paidJob = paidJob;
         this.area = area;
         this.foundAt = foundAt;
@@ -83,7 +84,7 @@ public class Job implements Serializable {
     }
 
     public void addField(Field newField) {
-        // add field if its not already there
+        // Add field if its not already there
         boolean alreadycontains = false;
         for (Field field : fields) {
             if (field.getField().equals(newField.getField())) {
@@ -92,17 +93,16 @@ public class Job implements Serializable {
         }
         if (alreadycontains == false) {
             fields.add(newField);
-            //System.out.println("added: " + newField.getField());
+            // System.out.println("added: " + newField.getField());
         }
 
     }
 
     public void removeField(String fieldName) {
-        // remove field if you find it there
+        // Remove field if you find it there
         for (int i = 0; i < fields.size(); i++) {
             if (fields.get(i).getField().equals(fieldName)) {
                 fields.remove(i);
-                //System.out.println("removed: " + fieldName);
             }
         }
 

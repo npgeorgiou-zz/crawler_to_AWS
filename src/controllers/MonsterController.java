@@ -2,6 +2,7 @@ package controllers;
 
 import model.Metrics;
 import crawlers.MonsterCrawler;
+import di.DI;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +14,8 @@ public class MonsterController extends BaseController {
     String[] areas;
 
     // constructor
-    public MonsterController(String jobsiteName) {
-        super(jobsiteName);
+    public MonsterController(String jobsiteName, DI di) {
+        super(jobsiteName, di);
         
         setUpAreaCodes();
         areas = AC.keySet().toArray(new String[AC.size()]);
@@ -28,7 +29,7 @@ public class MonsterController extends BaseController {
 
             for (String area : areas) {
                 String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                MonsterCrawler crawler = new MonsterCrawler(URL, area, ENGINEER, jobsiteName, languageDetector);
+                MonsterCrawler crawler = new MonsterCrawler(di, URL, area, ENGINEER, jobsiteName);
                 Metrics m = crawler.scan();
                 METRICS.updateMetrics(m);
             }
@@ -43,7 +44,7 @@ public class MonsterController extends BaseController {
 
             for (String area : areas) {
                 String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                MonsterCrawler crawler = new MonsterCrawler(URL, area, IT, jobsiteName, languageDetector);
+                MonsterCrawler crawler = new MonsterCrawler(di, URL, area, IT, jobsiteName);
                 Metrics m = crawler.scan();
                 METRICS.updateMetrics(m);
             }
@@ -59,7 +60,7 @@ public class MonsterController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawler = new MonsterCrawler(URL, area, SERVICE, jobsiteName, languageDetector);
+                    MonsterCrawler crawler = new MonsterCrawler(di, URL, area, SERVICE, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -75,7 +76,7 @@ public class MonsterController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawler = new MonsterCrawler(URL, area, SERVICE, jobsiteName, languageDetector);
+                    MonsterCrawler crawler = new MonsterCrawler(di, URL, area, SERVICE, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -91,7 +92,7 @@ public class MonsterController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawler = new MonsterCrawler(URL, area, BUSINESS_OFFICE, jobsiteName, languageDetector);
+                    MonsterCrawler crawler = new MonsterCrawler(di, URL, area, BUSINESS_OFFICE, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -106,7 +107,7 @@ public class MonsterController extends BaseController {
 
             for (String area : areas) {
                 String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                MonsterCrawler crawler = new MonsterCrawler(URL, area, RES_EDU, jobsiteName, languageDetector);
+                MonsterCrawler crawler = new MonsterCrawler(di, URL, area, RES_EDU, jobsiteName);
                 Metrics m = crawler.scan();
                 METRICS.updateMetrics(m);
             }
@@ -122,7 +123,7 @@ public class MonsterController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawler = new MonsterCrawler(URL, area, BUSINESS_OFFICE, jobsiteName, languageDetector);
+                    MonsterCrawler crawler = new MonsterCrawler(di, URL, area, BUSINESS_OFFICE, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -139,7 +140,7 @@ public class MonsterController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://jobsoeg.monster.dk" + "/" + AC.get(area) + "+" + field + "_14";
-                    MonsterCrawler crawler = new MonsterCrawler(URL, area, LEADERSHIP, jobsiteName, languageDetector);
+                    MonsterCrawler crawler = new MonsterCrawler(di, URL, area, LEADERSHIP, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }

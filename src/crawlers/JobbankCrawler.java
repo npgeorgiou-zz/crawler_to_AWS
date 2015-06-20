@@ -10,7 +10,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import crawlerUtils.LangDetect;
+import di.DI;
 import model.Metrics;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
@@ -23,8 +23,8 @@ public class JobbankCrawler extends BaseCrawler{
     // declare variables
 
     // constructor
-    public JobbankCrawler(String URL, String area, String jobCategory, String foundAt, LangDetect languageDetector) throws IOException {
-        super(URL, area, jobCategory, foundAt, languageDetector);
+    public JobbankCrawler(DI di, String URL, String area, String jobCategory, String foundAt) throws IOException {
+        super(di, URL, area, jobCategory, foundAt);
     }
 
     public Metrics scan() {
@@ -42,7 +42,7 @@ public class JobbankCrawler extends BaseCrawler{
                 ArrayList<Job> paidJobs = scanDocForPaid(doc, area, foundAt);
 
                 // save Jobs
-                int duplicateJobs = dbUtils.deleteDuplicatesAndAddtoDB(paidJobs);
+                int duplicateJobs = di.getDB().deleteDuplicatesAndAddtoDB(paidJobs);
                 METRICS.setDuplicateJobs(METRICS.getDuplicateJobs() + duplicateJobs);
             } catch (ParseException pe) {
                 METRICS.incrementExceptions();
@@ -120,7 +120,7 @@ public class JobbankCrawler extends BaseCrawler{
 
                     }
                     // check if ad required danish even if its written in English
-                    if (filter.checkIfRequiresDanish(jobText)) {
+                    if (di.getFilter().checkIfRequiresDanish(jobText)) {
                         // System.out.println("Danish requirement:" + internalJobPage.baseUri());
                         danish = true;
                     }
@@ -193,13 +193,10 @@ public class JobbankCrawler extends BaseCrawler{
                         }
                         System.out.println("________________________________________________" + "\r\n");
 
-                        // temporarily set text as "" so as not to overload DB
-                        jobText = "";
-
-                        Job identifiedJob = new Job(jobTitle, jobAnnouncer, jobURL, jobDate, jobText, 1, city, foundAt, new ArrayList());
+                        Job identifiedJob = new Job(di, jobTitle, jobAnnouncer, jobURL, jobDate, jobText, 1, city, foundAt, new ArrayList());
                         Field f = new Field(jobCategory);
                         identifiedJob.addField(f);
-                        identifiedJob = filter.filterTitleForPossibleChangeInFields(identifiedJob, jobCategory, jobTitle);
+                        identifiedJob = di.getFilter().filterTitleForPossibleChangeInFields(identifiedJob, jobCategory, jobTitle);
 
                         jobs.add(identifiedJob);
                         METRICS.incrementJobsInEnglish();

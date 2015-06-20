@@ -1,67 +1,81 @@
 package bin;
 
+import di.Config;
 import controllers.JobbankController;
 import controllers.JobbsafariController;
 import controllers.JobindexController;
 import controllers.JobnetController;
 import controllers.MonsterController;
+import di.Logger;
 import model.Metrics;
-import dbUtils.DatabaseUtils;
+import di.DI;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class Master {
 
-    static Metrics finalM = new Metrics("TOTAL");
-    private static final DatabaseUtils dbUtils = new DatabaseUtils();
+    private static final Metrics finalM = new Metrics("TOTAL");
+    private static Config c;
 
     public static void main(String[] args) {
+
+        // Instantiate DI
+        DI di = new DI();
         
         // Run crawler every 24 hours
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                scan();
+                scan(di);
             }
         }, new Date(), 24 * 60 * 60 * 1000);
 
     }
 
-    private static void scan() {
+    private static void scan(DI di) {
 
         // Empty DB
-        dbUtils.flushDatabase();
-         
-        Metrics jnm = new JobnetController("Jobnet").start();
-        finalM.updateMetrics(jnm);
+        di.getDB().flushDatabase();
 
-        //Jobbank
-        Metrics jbm = new JobbankController("Jobbank").start();
-        finalM.updateMetrics(jbm);
+        c = di.getConfig();
+        
+        // Jobbank       
+        if (c.getProp("jobbank").equals("true")) {
+            Metrics jbm = new JobbankController("Jobbank", di).start();
+            System.out.println(jbm.toString());
+            finalM.updateMetrics(jbm);
+        }
 
-        //Monster
-        Metrics mm = new MonsterController("Monster").start();
-        finalM.updateMetrics(mm);
+        // Monster
+        if (c.getProp("jobbank").equals("true")) {
+            Metrics mm = new MonsterController("Monster", di).start();
+            System.out.println(mm.toString());
+            finalM.updateMetrics(mm);
+        }
 
-        //Jobindex
-        Metrics jim = new JobindexController("Jobindex").start();
-        finalM.updateMetrics(jim);
+        // Jobindex
+        if (c.getProp("jobbank").equals("true")) {
+            Metrics jim = new JobindexController("Jobindex", di).start();
+            System.out.println(jim.toString());
+            finalM.updateMetrics(jim);
+        }
 
-        //Jobnet
- 
+        // Jobnet        
+        if (c.getProp("jobbank").equals("true")) {
+            Metrics jnm = new JobnetController("Jobnet", di).start();
+            System.out.println(jnm.toString());
+            finalM.updateMetrics(jnm);
+        }
 
-        //Jobbsafari
-        Metrics jsm = new JobbsafariController("Jobsafari").start();
-        finalM.updateMetrics(jsm);
-
-        // Sout results
-        System.out.println(jbm.toString());
-        System.out.println(mm.toString());
-        System.out.println(jim.toString());
-        System.out.println(jnm.toString());
-        System.out.println(jsm.toString()); 
-        System.out.println(finalM.toString()); 
+        // Jobbsafari        
+        if (c.getProp("jobbank").equals("true")) {
+            Metrics jsm = new JobbsafariController("Jobsafari", di).start();
+            System.out.println(jsm.toString());
+            finalM.updateMetrics(jsm);
+        }
+        
+        System.out.println(finalM.toString());
 
         // Save results
         // dbUtils.addMetricToDatabase(finalM)

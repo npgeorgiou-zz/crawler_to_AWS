@@ -1,4 +1,4 @@
-package config;
+package di;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -7,11 +7,18 @@ import java.util.Properties;
 
 public class Config {
 
-    public static Properties prop = new Properties();
-    public String path = "C:\\Users\\ksptsinplanet\\Documents\\NetBeansProjects\\GlobejobCrawler_ToMySQL\\crawler.properties";
+    // Declare variables
+    public static Properties prop;
+    public String path;
 
     String value = "";
 
+    // Contrsuctor
+    public Config(String path){
+        this.path = path;
+        Config.prop = new Properties();
+    }
+    // Methods
     public String getProp(String title) {
         try {
             prop.load(new FileInputStream(path));

@@ -2,6 +2,7 @@ package controllers;
 
 import model.Metrics;
 import crawlers.JobbsafariCrawler;
+import di.DI;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +14,8 @@ public class JobbsafariController extends BaseController {
     String[] areas;
 
     // constructor
-    public JobbsafariController(String jobsiteName) {
-        super(jobsiteName);
+    public JobbsafariController(String jobsiteName, DI di) {
+        super(jobsiteName, di);
 
         setUpAreaCodes();
         areas = AC.keySet().toArray(new String[AC.size()]);
@@ -29,7 +30,7 @@ public class JobbsafariController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/teknik" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, ENGINEER, jobsiteName, languageDetector);
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(di, URL, area, ENGINEER, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -45,7 +46,7 @@ public class JobbsafariController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/it" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, IT, jobsiteName, languageDetector);
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(di, URL, area, IT, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -61,7 +62,7 @@ public class JobbsafariController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/detaljhandel" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, SERVICE, jobsiteName, languageDetector);
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(di, URL, area, SERVICE, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -76,7 +77,7 @@ public class JobbsafariController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/industri" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, SERVICE, jobsiteName, languageDetector);
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(di, URL, area, SERVICE, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -91,7 +92,7 @@ public class JobbsafariController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/forsaljning" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, BUSINESS_OFFICE, jobsiteName, languageDetector);
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(di, URL, area, BUSINESS_OFFICE, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -106,7 +107,7 @@ public class JobbsafariController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/undervisning" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, RES_EDU, jobsiteName, languageDetector);
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(di, URL, area, RES_EDU, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -121,7 +122,7 @@ public class JobbsafariController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/kontor" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, BUSINESS_OFFICE, jobsiteName, languageDetector);
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(di, URL, area, BUSINESS_OFFICE, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -130,7 +131,7 @@ public class JobbsafariController extends BaseController {
             for (String field : fields2) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/management" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, BUSINESS_OFFICE, jobsiteName, languageDetector);
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(di, URL, area, BUSINESS_OFFICE, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -146,7 +147,7 @@ public class JobbsafariController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/socialt" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, MED_SOC, jobsiteName, languageDetector);
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(di, URL, area, MED_SOC, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -160,7 +161,7 @@ public class JobbsafariController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/andra" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, STUDENT, jobsiteName, languageDetector);
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(di, URL, area, STUDENT, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -176,7 +177,7 @@ public class JobbsafariController extends BaseController {
             for (String field : fields) {
                 for (String area : areas) {
                     String URL = "http://www.jobbsafari.se/jobb/management" + "/" + field + "/" + AC.get(area);
-                    JobbsafariCrawler crawler = new JobbsafariCrawler(URL, area, LEADERSHIP, jobsiteName, languageDetector);
+                    JobbsafariCrawler crawler = new JobbsafariCrawler(di, URL, area, LEADERSHIP, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }

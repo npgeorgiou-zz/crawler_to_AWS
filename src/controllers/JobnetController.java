@@ -2,6 +2,7 @@ package controllers;
 
 import model.Metrics;
 import crawlers.JobnetCrawler;
+import di.DI;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,8 +16,8 @@ public class JobnetController extends BaseController{
 
     
     // constructor
-    public JobnetController(String jobsiteName) {
-        super(jobsiteName);
+    public JobnetController(String jobsiteName, DI di) {
+        super(jobsiteName, di);
 
         setUpAreaCodes();
         setUpFieldCodes();
@@ -33,7 +34,7 @@ public class JobnetController extends BaseController{
 //            for (String area : areas) {
 //                for (String field : fields) {
 //                    String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-//                    Crawler crawler = new Crawler(URL, field, area, "engineer");
+//                    Crawler crawler = new Crawler(di, URL, field, area, "engineer");
 //
 //                }
 //            }
@@ -49,7 +50,7 @@ public class JobnetController extends BaseController{
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, IT, jobsiteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(di, URL, area, IT, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -67,7 +68,7 @@ public class JobnetController extends BaseController{
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, SERVICE, jobsiteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(di, URL, area, SERVICE, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -86,7 +87,7 @@ public class JobnetController extends BaseController{
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, SERVICE, jobsiteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(di, URL, area, SERVICE, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -103,7 +104,7 @@ public class JobnetController extends BaseController{
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, BUSINESS_OFFICE, jobsiteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(di, URL, area, BUSINESS_OFFICE, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -120,7 +121,7 @@ public class JobnetController extends BaseController{
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, RES_EDU, jobsiteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(di, URL, area, RES_EDU, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -137,7 +138,7 @@ public class JobnetController extends BaseController{
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, BUSINESS_OFFICE, jobsiteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(di, URL, area, BUSINESS_OFFICE, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -154,7 +155,7 @@ public class JobnetController extends BaseController{
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, MED_SOC, jobsiteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(di, URL, area, MED_SOC, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }
@@ -171,7 +172,7 @@ public class JobnetController extends BaseController{
             for (String area : areas) {
                 for (String field : fields) {
                     String URL = "https://job.jobnet.dk/FindJobService/V1/Gateway.ashx/annonce?region=" + AC.get(area) + "&erhvervsomraade=" + FC.get(field) + "&start=1&antal=5000&sortering=publicering&format=json";
-                    JobnetCrawler crawler = new JobnetCrawler(URL, area, LEADERSHIP, jobsiteName, languageDetector);
+                    JobnetCrawler crawler = new JobnetCrawler(di, URL, area, LEADERSHIP, jobsiteName);
                     Metrics m = crawler.scan();
                     METRICS.updateMetrics(m);
                 }

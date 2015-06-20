@@ -1,0 +1,60 @@
+NATURAL_SCIENCES [] 			 # 	Project Engineers – Signalling Programme
+NATURAL_SCIENCES [] 			 # 	PhD scholarship in Effective Implementation of Sustainability Approaches in Companies
+NATURAL_SCIENCES [] 			 # 	Senior Drilling Supervisor
+NATURAL_SCIENCES [] 			 # 	Instrument Integrator
+NATURAL_SCIENCES [] 			 # 	Mechanical Engineer
+NATURAL_SCIENCES [] 			 # 	1 Service Engineer – worldwide support (Denmark)
+NATURAL_SCIENCES [] 			 # 	Mechanical Engineer
+NATURAL_SCIENCES [] 			 # 	Apply for Awapatent’s Trainee Programme 2015
+NATURAL_SCIENCES --> STUDENT	 # 	Are you looking for a student job within communications? Can you get attention and create excitement?
+NATURAL_SCIENCES --> STUDENT	 # 	MITAS - Maersk Drilling Graduate Programme - Electrical Power or Control System Engineer (Maersk Drilling)
+NATURAL_SCIENCES [] 			 # 	Mechanical Engineer
+NATURAL_SCIENCES [] 			 # 	By Malene Birger - E-Commerce Campaign Coordinator
+NATURAL_SCIENCES --> BUSINESS_OFFICE	 # 	Business Analyst – Self Service Instant Booking (Maersk Line)
+NATURAL_SCIENCES [] 			 # 	Web Designer
+NATURAL_SCIENCES --> IT	 # 	Senior IT analyst
+NATURAL_SCIENCES --> BUSINESS_OFFICE	 # 	Senior IT analyst
+NATURAL_SCIENCES [] 			 # 	Coordinator, Group Visual Merchandising
+NATURAL_SCIENCES --> IT	 # 	Lead UI/UX Designer Helsinki (full-time) - 1 open position
+NATURAL_SCIENCES --> IT	 # 	UI/UX Designer Helsinki (full-time) - 1 open position
+NATURAL_SCIENCES [] 			 # 	Opslag
+NATURAL_SCIENCES [] 			 # 	Project Manager, Group Visual Merchandising
+NATURAL_SCIENCES [] 			 # 	Solution Architect
+NATURAL_SCIENCES --> BUSINESS_OFFICE	 # 	Experienced Business Architect
+NATURAL_SCIENCES --> IT	 # 	UX Designer - København K, Denmark
+NATURAL_SCIENCES [] 			 # 	Communications Manager
+NATURAL_SCIENCES --> IT	 # 	Digital Communications Specialist
+NATURAL_SCIENCES [] 			 # 	System Architect - leading architecture to secure successful hearing systems
+NATURAL_SCIENCES [] 			 # 	Advertising Account Executive - Nordics
+NATURAL_SCIENCES --> IT	 # 	Graphic Designer - Part Time
+NATURAL_SCIENCES --> IT	 # 	Product Designer/ UX Designer
+NATURAL_SCIENCES [] 			 # 	User Experience Architect
+NATURAL_SCIENCES [] 			 # 	International Social Media Manager
+NATURAL_SCIENCES --> IT	 # 	UX Designer
+NATURAL_SCIENCES --> IT	 # 	Intranet Manager / digital communication & collaboration manager
+NATURAL_SCIENCES --> IT	 # 	IBM Cloud Advisor
+NATURAL_SCIENCES --> IT	 # 	IBM Cloud Advisor
+NATURAL_SCIENCES --> IT	 # 	Level Designer
+NATURAL_SCIENCES --> BUSINESS_OFFICE	 # 	Business Architect
+NATURAL_SCIENCES --> STUDENT	 # 	Internship architect student - autumn 2015
+NATURAL_SCIENCES --> IT	 # 	iOS and Android Developers at Unwire
+NATURAL_SCIENCES [] 			 # 	Falcon Social - Interaction Designer
+NATURAL_SCIENCES [] 			 # 	Data Scientist (Maersk Drilling)
+NATURAL_SCIENCES --> IT	 # 	Freelance Digital Designer
+NATURAL_SCIENCES --> STUDENT	 # 	Design Intern at Bang & Olufsen
+NATURAL_SCIENCES --> IT	 # 	Freelance-opgave: Expert UI Designer (Material Design) (M/F)
+NATURAL_SCIENCES [] 			 # 	Freelance-opgave: Senior Interaction and Visual designers (M/F)
+NATURAL_SCIENCES [] 			 # 	Technical Character Artist
+NATURAL_SCIENCES --> IT	 # 	Falcon Social - UX Designer
+NATURAL_SCIENCES [] 			 # 	Design Section Manager
+NATURAL_SCIENCES [] 			 # 	Opslag
+NATURAL_SCIENCES --> STUDENT	 # 	Internships in the conservation department
+NATURAL_SCIENCES [] 			 # 	Opslag
+NATURAL_SCIENCES --> IT	 # 	Cloud Technologist IV
+NATURAL_SCIENCES --> IT	 # 	Environment Artist
+NATURAL_SCIENCES [] 			 # 	Character Artist
+NATURAL_SCIENCES [] 			 # 	Senior frontender
+NATURAL_SCIENCES --> IT	 # 	Gameplay Programmer
+NATURAL_SCIENCES [] 			 # 	GUI Designer
+NATURAL_SCIENCES [] 			 # 	Discue | GD Job
+NATURAL_SCIENCES [] 			 # 	Lead Designer

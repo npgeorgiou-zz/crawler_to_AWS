@@ -1,6 +1,5 @@
-package crawlerUtils;
+package di;
 
-import config.Config;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,8 +8,10 @@ import model.Job;
 
 public class Filter {
 
-    //variables
+    // Declare variables
+    DI di;
     Config config;
+    Logger logger;
     private final String ENGINEER = "NATURAL_SCIENCES";
     private final String IT = "IT";
     private final String BUSINESS_OFFICE = "BUSINESS_OFFICE";
@@ -22,13 +23,14 @@ public class Filter {
     private final String MED_SOC = "MED_SOC";
     private final String STUDENT = "STUDENT";
 
-    //constructor
-    public Filter() {
-        config = new Config();
-        // Get categories names from Config file
+    // Constructor
+    public Filter(DI di) {
+        this.di = di;
+        config = di.getConfig();
+        logger = di.getLogger();
     }
 
-    //methods
+    // Methods
     public boolean checkIfRequiresDanish(String s) {
         String nordicKeywords = config.getProp("nordic_language_keywords");
         StringTokenizer regex = new StringTokenizer(nordicKeywords, ",");
@@ -48,11 +50,13 @@ public class Filter {
     }
 
     public String homogeniseCompanyName(String cn) {
-        
+
+        String originalCn = cn;
+
         //remove weird gap char
         cn = cn.replaceAll("\\u0096", "")
                 .replaceAll("\\u00a0", "");
-        
+
         //.dk, .com
         cn = cn.replaceAll("\\.dk", "");
         cn = cn.replaceAll("\\.com", "");
@@ -122,15 +126,15 @@ public class Filter {
         if (cn.equalsIgnoreCase("RUC")) {
             cn = "University of Roskilde";
         }
-        
+
         //remove generic unnecessary bits like A/S, aps etch
         StringTokenizer regex = new StringTokenizer(config.getProp("company_name_dirts"), ",");
         String data = "";
-        
+
         while (regex.hasMoreElements()) {
             data = data + "(\\b" + regex.nextToken().replaceAll("^\\s", "") + "\\b)|";
         }
-        
+
         String PatternAsTokens = data.substring(0, data.length() - 1);
         Pattern myPattern = Pattern.compile(PatternAsTokens, Pattern.CASE_INSENSITIVE);
 
@@ -147,10 +151,10 @@ public class Filter {
 
         //filter whitespaces that are more than one
         cn = cn.replaceAll(" +", " ");
-        
+
         //remove spaces from beginning and end of string
         cn = cn.trim();
-        
+
         //now from the clean name, replace some companies that tend to have 2 or more different names, with a standard
         cn = replaceStrings(cn);
 
@@ -182,6 +186,11 @@ public class Filter {
             cn = cn.substring(1);
         }
 
+        // Log change
+        if (!originalCn.equals(cn)) {
+            String log = originalCn + " --> " + cn;
+            logger.write("company_names", log);
+        }
         return cn;
     }
 
@@ -292,23 +301,25 @@ public class Filter {
     }
 
     public String homogeniseJobTitle(String jt) {
-        
+
+        String originalJt = jt;
+
         //remove weird gap char
         jt = jt.replaceAll("\\u0096", "")
                 .replaceAll("\\u00a0", "");
-        
+
         //remove commas and dots from end
         jt = jt.replaceAll("[,.:]+$", "");
-        
+
         //replace ! with .
         jt = jt.replaceAll("!", "");
-        
+
         //remove numbers that are more than 2 and are in beginning of String
         if (jt.length() != 0) {
             if (Character.isDigit(jt.charAt(0)) && Character.isDigit(jt.charAt(1)) && Character.isDigit(jt.charAt(2))) {
                 jt = jt.replaceFirst("^[0-9]+(?!$)", "");
                 jt = jt.trim();
-                
+
                 //remove commas, dots, -s from beginning
                 jt = jt.replaceFirst("^[,.:-]+(?!$)", "");
             }
@@ -357,16 +368,25 @@ public class Filter {
 
         //filter before and after whitespaces
         jt = jt.trim();
-        
+
         //capitalise first letter
         if (jt.length() != 0) {
             jt = jt.substring(0, 1).toUpperCase() + jt.substring(1);
+        }
+
+        // Log change
+        if (!originalJt.equals(jt)) {
+            String log = originalJt + " --> " + jt;
+            logger.write("job_titles", log);
         }
 
         return jt;
     }
 
     public String homogeniseURL(String url) {
+
+        String originalUrl = url;
+
         // http://www.milestonesys.com/Company/Milestone-Systems/jobsandcareers/Job-Details/?jobId=443#jobbank.dk
         if (url.contains("www.milestonesys.com")) {
             url = url.replaceAll("#jobbank.dk", "");
@@ -388,6 +408,13 @@ public class Filter {
             }
 
         }
+
+        // Log change
+        if (!originalUrl.equals(url)) {
+            String log = originalUrl + " --> " + url;
+            logger.write("urls", log);
+        }
+
         return url;
     }
 
@@ -397,267 +424,266 @@ public class Filter {
 
         switch (jobCategory) {
             case RES_EDU:
-                if (titleContainsFieldKeywords(config.getProp("student_keywords"), jobTitle)) {//if title contains student words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + STUDENT + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("student_keywords"), jobTitle)) {// If title contains student words
+                    String log = jobCategory.toUpperCase() + " --> " + STUDENT + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, STUDENT, "MOVE");
                     fieldChanged = true;
                     break;
                 }
             case STUDENT:
-                if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {//if title contains researchAndEdu words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + RES_EDU + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {// If title contains researchAndEdu words
+                    String log = jobCategory.toUpperCase() + " --> " + RES_EDU + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, RES_EDU, "MOVE");
                     fieldChanged = true;
                     break;
                 }
             case LEADERSHIP:
-                if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {//if title contains researchAndEdu words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + RES_EDU + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {// If title contains researchAndEdu words
+                    String log = jobCategory.toUpperCase() + " --> " + RES_EDU + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, RES_EDU, "MOVE");
                     fieldChanged = true;
                     break;
                 }
-                if (titleContainsFieldKeywords(config.getProp("student_keywords"), jobTitle)) {//if title contains student words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + STUDENT + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("student_keywords"), jobTitle)) {// If title contains student words
+                    String log = jobCategory.toUpperCase() + " --> " + STUDENT + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, STUDENT, "MOVE");
                     fieldChanged = true;
                     break;
                 }
-                if (titleContainsFieldKeywords(config.getProp("engineer_keywords"), jobTitle)) {//if title contains engineer words
-                    System.out.println(jobCategory.toUpperCase() + " ++++ "
-                            + ENGINEER + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("engineer_keywords"), jobTitle)) {// If title contains engineer words
+                    String log = jobCategory.toUpperCase() + " ++ "
+                            + ENGINEER + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, ENGINEER, "ADD");
                     fieldChanged = true;
                 }
 
-                if (titleContainsFieldKeywords(config.getProp("it_keywords"), jobTitle)) {//if title contains IT words
-                    System.out.println(jobCategory.toUpperCase() + " ++++ "
-                            + IT + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("it_keywords"), jobTitle)) {// If title contains IT words
+                    String log = jobCategory.toUpperCase() + " ++ " + IT + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, IT, "ADD");
                     fieldChanged = true;
                 }
-                if (titleContainsFieldKeywords(config.getProp("industry_keywords"), jobTitle)) {//if title contains industry words
-                    System.out.println(jobCategory.toUpperCase() + " ++++ "
-                            + INDUSTRY + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("industry_keywords"), jobTitle)) {// If title contains industry words
+                    String log = jobCategory.toUpperCase() + " ++ "
+                            + INDUSTRY + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, INDUSTRY, "ADD");
                     fieldChanged = true;
                 }
-                if (titleContainsFieldKeywords(config.getProp("med_soc_keywords"), jobTitle)) {//if title contains M&S words
-                    System.out.println(jobCategory.toUpperCase() + " ++++ "
-                            + MED_SOC + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("med_soc_keywords"), jobTitle)) {// If title contains M&S words
+                    String log = jobCategory.toUpperCase() + " ++ " + MED_SOC + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, MARKETING, "ADD");
                     fieldChanged = true;
                 }
-                if (titleContainsFieldKeywords(config.getProp("business_keywords"), jobTitle)) {//if title contains business words
-                    System.out.println(jobCategory.toUpperCase() + " ++++ "
-                            + BUSINESS_OFFICE + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("business_keywords"), jobTitle)) {// If title contains business words
+                    String log = jobCategory.toUpperCase() + " ++ " + BUSINESS_OFFICE + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, BUSINESS_OFFICE, "ADD");
                     fieldChanged = true;
                 }
                 if (titleContainsFieldKeywords(config.getProp("service_keywords"), jobTitle)) {//if ititlet contains service words
-                    System.out.println(jobCategory.toUpperCase() + " ++++ "
-                            + SERVICE + " # " + "\t" + jobTitle + "\r\n");
+                    String log = jobCategory.toUpperCase() + " ++ " + SERVICE + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, SERVICE, "ADD");
                     fieldChanged = true;
                 }
             case IT:
-                if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {//if title contains researchAndEdu words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + RES_EDU + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {// If title contains researchAndEdu words
+                    String log = jobCategory.toUpperCase() + " --> " + RES_EDU + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, RES_EDU, "MOVE");
                     fieldChanged = true;
                     break;
                 }
-                if (titleContainsFieldKeywords(config.getProp("student_keywords"), jobTitle)) {//if title contains student words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + STUDENT + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("student_keywords"), jobTitle)) {// If title contains student words
+                    String log = jobCategory.toUpperCase() + " --> " + STUDENT + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, STUDENT, "MOVE");
                     fieldChanged = true;
                     break;
                 }
-                if (titleContainsFieldKeywords(config.getProp("engineer_keywords"), jobTitle)) {//if title contains engineer words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + ENGINEER + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("engineer_keywords"), jobTitle)) {// If title contains engineer words
+                    String log = jobCategory.toUpperCase() + " --> " + ENGINEER + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, ENGINEER, "MOVE");
                     fieldChanged = true;
                 }
 
-                if (titleContainsFieldKeywords(config.getProp("industry_keywords"), jobTitle)) {//if title contains industry words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + INDUSTRY + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("industry_keywords"), jobTitle)) {// If title contains industry words
+                    String log = jobCategory.toUpperCase() + " --> " + INDUSTRY + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, INDUSTRY, "MOVE");
                     fieldChanged = true;
                 }
 
-                if (titleContainsFieldKeywords(config.getProp("med_soc_keywords"), jobTitle)) {//if title contains MED&SOC words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + MED_SOC + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("med_soc_keywords"), jobTitle)) {// If title contains MED&SOC words
+                    String log = jobCategory.toUpperCase() + " --> " + MED_SOC + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, MED_SOC, "MOVE");
                     fieldChanged = true;
                 }
-                if (titleContainsFieldKeywords(config.getProp("business_keywords"), jobTitle)) {//if title contains business words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + BUSINESS_OFFICE + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("business_keywords"), jobTitle)) {// If title contains business words
+                    String log = jobCategory.toUpperCase() + " --> " + BUSINESS_OFFICE + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, BUSINESS_OFFICE, "MOVE");
                     fieldChanged = true;
                 }
-//                if (filterCategory(Filters.LEADERSHIP, jobTitle)) {//if title contains leadership words
-//                    System.out.println(jobCategory.toUpperCase() + " ++++ "
-//                            + LEADERSHIP + " # " + "\t" + jobTitle + "\r\n");
+//                if (filterCategory(Filters.LEADERSHIP, jobTitle)) {// If title contains leadership words
+//                    String log = jobCategory.toUpperCase() + " ++ "+ LEADERSHIP + "\t" + " # " + "\t" + jobTitle; fileWriter.getInstance(di).write("fields", log);  
 //                    changeJobField(JobBeingFiletered, jobCategory, Filters.LEADERSHIP, "ADD");
 //                    fieldChanged = true;
 //                }
-                if (titleContainsFieldKeywords(config.getProp("service_keywords"), jobTitle)) {//if title contains service words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + SERVICE + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("service_keywords"), jobTitle)) {// If title contains service words
+                    String log = jobCategory.toUpperCase() + " --> " + SERVICE + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, SERVICE, "MOVE");
                     fieldChanged = true;
                 }
                 //but if it also has it words, re add it category (so keep it in original category too)
-                if (titleContainsFieldKeywords(config.getProp("it_keywords"), jobTitle)) {//if title contains IT words
-                    System.out.println(jobCategory.toUpperCase() + " [][] "
-                            + "\t" + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("it_keywords"), jobTitle)) {// If title contains IT words
+                    String log = jobCategory.toUpperCase() + " [] " + "\t" + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, IT, "ADD");
                     fieldChanged = false;
                 }
 
             case BUSINESS_OFFICE:
-                if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {//if title contains researchAndEdu words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + RES_EDU + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {// If title contains researchAndEdu words
+                    String log = jobCategory.toUpperCase() + " --> " + RES_EDU + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, RES_EDU, "MOVE");
                     fieldChanged = true;
                     break;
                 }
-                if (titleContainsFieldKeywords(config.getProp("student_keywords"), jobTitle)) {//if title contains student words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + STUDENT + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("student_keywords"), jobTitle)) {// If title contains student words
+                    String log = jobCategory.toUpperCase() + " --> " + STUDENT + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, STUDENT, "MOVE");
                     fieldChanged = true;
                     break;
                 }
-                if (titleContainsFieldKeywords(config.getProp("engineer_keywords"), jobTitle)) {//if title contains engineer words
-                    System.out.println(jobCategory.toUpperCase() + " ++++ "
-                            + ENGINEER + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("engineer_keywords"), jobTitle)) {// If title contains engineer words
+                    String log = jobCategory.toUpperCase() + " ++ " + ENGINEER + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, ENGINEER, "ADD");
                     fieldChanged = true;
                 }
-                if (titleContainsFieldKeywords(config.getProp("it_keywords"), jobTitle)) {//if title contains IT words
-                    System.out.println(jobCategory.toUpperCase() + " ++++ "
-                            + IT + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("it_keywords"), jobTitle)) {// If title contains IT words
+                    String log = jobCategory.toUpperCase() + " ++ " + IT + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, IT, "ADD");
                     fieldChanged = true;
                 }
-                if (titleContainsFieldKeywords(config.getProp("industry_keywords"), jobTitle)) {//if title contains industry words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + INDUSTRY + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("industry_keywords"), jobTitle)) {// If title contains industry words
+                    String log = jobCategory.toUpperCase() + " --> " + INDUSTRY + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, INDUSTRY, "MOVE");
                     fieldChanged = true;
                 }
-                if (titleContainsFieldKeywords(config.getProp("med_soc_keywords"), jobTitle)) {//if title contains M&S words
-                    System.out.println(jobCategory.toUpperCase() + " ++++ "
-                            + MED_SOC + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("med_soc_keywords"), jobTitle)) {// If title contains M&S words
+                    String log = jobCategory.toUpperCase() + " ++ " + MED_SOC + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, MED_SOC, "ADD");
                     fieldChanged = true;
                 }
-//                if (filterCategory(Filters.LEADERSHIP, jobTitle)) {//if title contains leadership words
-//                    System.out.println(jobCategory.toUpperCase() + " ++++  "
-//                            + LEADERSHIP + " # " + "\t" + jobTitle + "\r\n");
+//                if (filterCategory(Filters.LEADERSHIP, jobTitle)) {// If title contains leadership words
+//                    String log = jobCategory.toUpperCase() + " ++  "+ LEADERSHIP + "\t" + " # " + "\t" + jobTitle; fileWriter.getInstance(di).write("fields", log);  
 //                    changeJobField(JobBeingFiletered, jobCategory, Filters.LEADERSHIP, "ADD");
 //                    fieldChanged = true;
 //                }
                 if (titleContainsFieldKeywords(config.getProp("service_keywords"), jobTitle)) {//if ititlet contains service words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + SERVICE + " # " + "\t" + jobTitle + "\r\n");
+                    String log = jobCategory.toUpperCase() + " --> " + SERVICE + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, SERVICE, "MOVE");
                     fieldChanged = true;
                 }
             default:
-                if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {//if title contains researchAndEdu words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + RES_EDU + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("resEdu_keywords"), jobTitle)) {// If title contains researchAndEdu words
+                    String log = jobCategory.toUpperCase() + " --> " + RES_EDU + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, RES_EDU, "MOVE");
                     fieldChanged = true;
                     break;
                 }
-                if (titleContainsFieldKeywords(config.getProp("student_keywords"), jobTitle)) {//if title contains student words
-                    System.out.println(jobCategory.toUpperCase() + " ---> "
-                            + STUDENT + " # " + "\t" + jobTitle + "\r\n");
+                if (titleContainsFieldKeywords(config.getProp("student_keywords"), jobTitle)) {// If title contains student words
+                    String log = jobCategory.toUpperCase() + " --> " + STUDENT + "\t" + " # " + "\t" + jobTitle;
+                    logger.write("fields", log);
                     changeJobField(JobBeingFiletered, jobCategory, STUDENT, "MOVE");
                     fieldChanged = true;
                     break;
                 }
-                if (titleContainsFieldKeywords(config.getProp("engineer_keywords"), jobTitle)) {//if title contains engineer words
+                if (titleContainsFieldKeywords(config.getProp("engineer_keywords"), jobTitle)) {// If title contains engineer words
                     if (jobCategory.equals(ENGINEER)) {
                     } else {
-                        System.out.println(jobCategory.toUpperCase() + " ---> "
-                                + ENGINEER + " # " + "\t" + jobTitle + "\r\n");
+                        String log = jobCategory.toUpperCase() + " --> " + ENGINEER + "\t" + " # " + "\t" + jobTitle;
+                        logger.write("fields", log);
                         changeJobField(JobBeingFiletered, jobCategory, ENGINEER, "MOVE");
                         fieldChanged = true;
                     }
                 }
-                if (titleContainsFieldKeywords(config.getProp("it_keywords"), jobTitle)) {//if title contains IT words
+                if (titleContainsFieldKeywords(config.getProp("it_keywords"), jobTitle)) {// If title contains IT words
                     if (jobCategory.equals(IT)) {
                     } else {
-                        System.out.println(jobCategory.toUpperCase() + " ---> "
-                                + IT + " # " + "\t" + jobTitle + "\r\n");
+                        String log = jobCategory.toUpperCase() + " --> " + IT + "\t" + " # " + "\t" + jobTitle;
+                        logger.write("fields", log);
                         changeJobField(JobBeingFiletered, jobCategory, IT, "MOVE");
                         fieldChanged = true;
                     }
                 }
-                if (titleContainsFieldKeywords(config.getProp("industry_keywords"), jobTitle)) {//if title contains industry words
+                if (titleContainsFieldKeywords(config.getProp("industry_keywords"), jobTitle)) {// If title contains industry words
                     if (jobCategory.equals(INDUSTRY)) {
                     } else {
-                        System.out.println(jobCategory.toUpperCase() + " ---> "
-                                + INDUSTRY + " # " + "\t" + jobTitle + "\r\n");
+                        String log = jobCategory.toUpperCase() + " --> " + INDUSTRY + "\t" + " # " + "\t" + jobTitle;
+                        logger.write("fields", log);
                         changeJobField(JobBeingFiletered, jobCategory, INDUSTRY, "MOVE");
                         fieldChanged = true;
                     }
                 }
-                if (titleContainsFieldKeywords(config.getProp("med_soc_keywords"), jobTitle)) {//if title contains M&S words
+                if (titleContainsFieldKeywords(config.getProp("med_soc_keywords"), jobTitle)) {// If title contains M&S words
                     if (jobCategory.equals(MED_SOC)) {
                     } else {
-                        System.out.println(jobCategory.toUpperCase() + " ---> "
-                                + MED_SOC + " # " + "\t" + jobTitle + "\r\n");
+                        String log = jobCategory.toUpperCase() + " --> " + MED_SOC + "\t" + " # " + "\t" + jobTitle;
+                        logger.write("fields", log);
                         changeJobField(JobBeingFiletered, jobCategory, MED_SOC, "MOVE");
                         fieldChanged = true;
                     }
                 }
-                if (titleContainsFieldKeywords(config.getProp("business_keywords"), jobTitle)) {//if title contains business words
+                if (titleContainsFieldKeywords(config.getProp("business_keywords"), jobTitle)) {// If title contains business words
                     if (jobCategory.equals(BUSINESS_OFFICE)) {
                     } else {
-                        System.out.println(jobCategory.toUpperCase() + " ---> "
-                                + BUSINESS_OFFICE + " # " + "\t" + jobTitle + "\r\n");
+                        String log = jobCategory.toUpperCase() + " --> " + BUSINESS_OFFICE + "\t" + " # " + "\t" + jobTitle;
+                        logger.write("fields", log);
                         changeJobField(JobBeingFiletered, jobCategory, BUSINESS_OFFICE, "MOVE");
                         fieldChanged = true;
                     }
                 }
-//                if (filterCategory(Filters.LEADERSHIP, jobTitle)) {//if title contains leadership words
+//                if (filterCategory(Filters.LEADERSHIP, jobTitle)) {// If title contains leadership words
 //                    if (jobCategory.equals(Filters.LEADERSHIP)) {
 //                    } else {
-//                        System.out.println(jobCategory.toUpperCase() + " ++++  "
-//                                + LEADERSHIP + " # " + "\t" + jobTitle + "\r\n");
+//                        String log = jobCategory.toUpperCase() + " ++  "+ LEADERSHIP + "\t" + " # " + "\t" + jobTitle; fileWriter.getInstance(di).write("fields", log);  
 //                        changeJobField(JobBeingFiletered, jobCategory, Filters.LEADERSHIP, "ADD");
 //                        fieldChanged = true;
 //                    }
 //                }
-                if (titleContainsFieldKeywords(config.getProp("service_keywords"), jobTitle)) {//if title contains service words
+                if (titleContainsFieldKeywords(config.getProp("service_keywords"), jobTitle)) {// If title contains service words
                     if (jobCategory.equals(SERVICE)) {
                     } else {
-                        System.out.println(jobCategory.toUpperCase() + " ---> "
-                                + SERVICE + " # " + "\t" + jobTitle + "\r\n");
+                        String log = jobCategory.toUpperCase() + " --> " + SERVICE + "\t" + " # " + "\t" + jobTitle;
+                        logger.write("fields", log);
                         changeJobField(JobBeingFiletered, jobCategory, SERVICE, "MOVE");
                         fieldChanged = true;
                     }
                 }
         }
         if (!fieldChanged) {
-            System.out.println(jobCategory.toUpperCase() + " [][] "
-                    + "\t" + "\t" + " # " + "\t" + jobTitle + "\r\n");
+            String log = jobCategory.toUpperCase() + " [] " + "\t" + "\t" + "\t" + " # " + "\t" + jobTitle;
+            logger.write("fields", log);
         }
         return JobBeingFiletered;
     }
